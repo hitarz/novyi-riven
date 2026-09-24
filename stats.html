@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Статистика квесту — Партія «Новий Рівень»</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+  <style>
+    .counter-display {
+      font-size: 72px;
+      font-weight: 900;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--neon-green);
+      text-shadow: 0 0 30px var(--neon-green-glow);
+      margin: 20px 0;
+      letter-spacing: 2px;
+    }
+    .stats-card {
+      text-align: center;
+      padding: 36px 24px;
+    }
+    .stats-label {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--emerald-400);
+      font-weight: 700;
+    }
+    .stats-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 14px;
+    }
+    .stats-btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-container" style="max-width: 580px;">
+    <!-- Top Navigation Bar -->
+    <nav class="top-bar">
+      <a href="index.html" class="btn-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>На головну</span>
+      </a>
+    </nav>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-wrapper" style="width: 100px; height: 100px;">
+        <div class="logo-glow-ring"></div>
+        <img src="assets/logo.jpg" alt="Новий Рівень" class="logo-img">
+      </div>
+      <h1 class="brand-title">Аналітика <span>Квесту</span></h1>
+      <p class="brand-subtitle">Панель адміністратора</p>
+    </header>
+
+    <div class="cyber-card stats-card">
+      <div class="stats-label">Кількість переходів на квест:</div>
+      
+      <div id="counterValue" class="counter-display">...</div>
+
+      <p class="card-desc" style="margin-bottom: 0;">
+        Фіксує кожне відкриття секретного терміналу через корону сови, потрійний тап чи посилання.
+      </p>
+
+      <div class="stats-btn-row">
+        <button type="button" id="refreshBtn" class="btn-primary" style="height: 44px; padding: 0 24px; width: auto; font-size: 14px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span>Оновити дані</span>
+        </button>
+
+        <a href="https://countapi.mileshilliard.com/api/v1/get/novyi_riven_quest_clicks_licey_2026" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="font-size: 13px;">
+          <span>🌐 Прямий CounterAPI JSON</span>
+        </a>
+      </div>
+
+      <div id="lastUpdated" class="stats-meta">Оновлено щойно</div>
+    </div>
+
+    <footer class="footer">
+      <p>&copy; Партія «Новий Рівень». Внутрішня статистика переходів.</p>
+    </footer>
+  </div>
+
+  <script>
+    const counterValue = document.getElementById('counterValue');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const lastUpdated = document.getElementById('lastUpdated');
+
+    const API_URL = 'https://countapi.mileshilliard.com/api/v1/get/novyi_riven_quest_clicks_licey_2026';
+
+    async function loadStats() {
+      counterValue.style.opacity = '0.5';
+      try {
+        const res = await fetch(API_URL + '?t=' + Date.now(), { cache: 'no-cache' });
+        if (!res.ok) throw new Error('Помилка сервера статистики');
+        const data = await res.json();
+        
+        // Відображаємо значення
+        const val = typeof data.value === 'number' ? data.value : 0;
+        counterValue.textContent = val.toLocaleString();
+        lastUpdated.textContent = 'Останнє оновлення: ' + new Date().toLocaleTimeString();
+      } catch (e) {
+        console.error(e);
+        counterValue.textContent = '0';
+        lastUpdated.textContent = 'Немає даних або ще 0 кліків';
+      } finally {
+        counterValue.style.opacity = '1';
+      }
+    }
+
+    refreshBtn.addEventListener('click', loadStats);
+    loadStats();
+  </script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#060b08">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Секретний Квест — Партія «Новий Рівень»</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+</head>
+<body>
+
+  <div class="main-container">
+    <!-- Top Navigation Bar -->
+    <nav class="top-bar">
+      <a href="index.html" class="btn-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>До програми партії</span>
+      </a>
+    </nav>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-wrapper">
+        <div class="logo-glow-ring"></div>
+        <img src="assets/logo.jpg" alt="Новий Рівень" class="logo-img">
+      </div>
+      <h1 class="brand-title">Грандіозний <span>Квест</span></h1>
+      <p class="brand-subtitle">Партія «Новий Рівень»</p>
+      
+      <div class="badges-row">
+        <span class="badge-item highlight">💎 Telegram Premium на 6 міс.</span>
+        <span class="badge-item warning">🏆 Лише 1 переможець</span>
+        <span class="badge-item">📅 1 — 31 жовтня</span>
+      </div>
+    </header>
+
+    <!-- Grand Prize Banner -->
+    <div class="prize-banner">
+      <div class="prize-label">
+        <span>🎁 Головна нагорода квесту</span>
+      </div>
+      <h2 class="prize-title">TELEGRAM PREMIUM НА 6 МІСЯЦІВ! 💎</h2>
+      <p class="prize-sub">
+        <b>ВАЖЛИВО: Переможець буде ТІЛЬКИ ОДИН</b> — той, хто виявиться найшвидшим та найкмітливішим! 🏆
+      </p>
+    </div>
+
+    <!-- Quest Rules & Criteria Card -->
+    <div class="cyber-card">
+      <div class="card-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polygon points="12 6 12 12 16 14"></polygon>
+        </svg>
+        <span>Як взяти участь та перемогти?</span>
+      </div>
+      <p class="card-desc">
+        Друзі, ми запускаємо дещо справді масштабне прямо в стінах нашого ліцею! З 1 по 31 жовтня на вас чекає справжнє полювання за піврічною підпискою на Telegram Premium!
+      </p>
+
+      <div class="quest-rules-list">
+        <!-- Step 1 -->
+        <div class="rule-item">
+          <div class="rule-badge">1</div>
+          <div class="rule-content">
+            <h4 class="rule-title">🔍 Шукай та розгадуй</h4>
+            <p class="rule-desc">
+              Увесь жовтень у нашому ліцеї будуть заховані різноманітні загадки, головоломки та <b>секретні QR-коди</b>. Вмикай кмітливість, будь уважним на перервах та збирай підказки!
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="rule-item">
+          <div class="rule-badge">2</div>
+          <div class="rule-content">
+            <h4 class="rule-title">🧩 Збирай 30-значний шифр</h4>
+            <p class="rule-desc">
+              Кожна знайдена підказка містить частину таємного ключа. Об'єднай усі розгадані фрагменти разом у єдиний пароль рівно з <b>30 символів</b>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="rule-item">
+          <div class="rule-badge">3</div>
+          <div class="rule-content">
+            <h4 class="rule-title">🔓 Вводь код на сайті</h4>
+            <p class="rule-desc">
+              Вводь зібрану комбінацію у термінал нижче. Якщо все вірно — система розшифрує відео та відкриє <b>таємне підтверджувальне послання</b>!
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="rule-item">
+          <div class="rule-badge">4</div>
+          <div class="rule-content">
+            <h4 class="rule-title">🎁 Забирай приз!</h4>
+            <p class="rule-desc">
+              <b>Переможець лише один!</b> Перший, хто надішле або прийде з цим посланням до нашого президента в Telegram (<b>@zyabl1kkk</b>), забирає <b>Telegram Premium на 6 місяців</b> на свій акаунт!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Telegram submission button -->
+      <div style="margin-top: 20px; text-align: center;">
+        <a id="telegramSendBtn" href="https://t.me/zyabl1kkk" target="_blank" rel="noopener noreferrer" class="btn-telegram">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+          </svg>
+          <span>Надіслати код президенту (@zyabl1kkk)</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Password Input & Decrypt Card -->
+    <div id="lockCard" class="cyber-card">
+      <div class="card-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <span>Введіть зібраний пароль (30 символів)</span>
+      </div>
+      <p class="card-desc">
+        Вставте або введіть 30 знаків шифру, щоб запустити локальне дешифрування файлу в пам'яті вашого телефону:
+      </p>
+
+      <div class="input-wrapper">
+        <input 
+          type="password" 
+          id="passwordInput" 
+          class="password-input" 
+          placeholder="Введіть 30 символів шифру..." 
+          autocomplete="off" 
+          autocapitalize="off" 
+          spellcheck="false"
+          maxlength="50"
+        >
+        <div class="input-actions">
+          <button type="button" id="pasteBtn" class="action-btn" title="Вставити з буфера">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            </svg>
+          </button>
+          <button type="button" id="togglePasswordBtn" class="action-btn" title="Показати/приховати">
+            <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="input-meta">
+        <span>Статус ключа:</span>
+        <span id="charCount" class="char-counter">0 / 30 символів</span>
+      </div>
+
+      <button type="button" id="unlockBtn" class="btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>Розшифрувати відео</span>
+      </button>
+
+      <!-- Alert: Loading / Decrypting -->
+      <div id="loadingAlert" class="alert alert-loading">
+        <div class="spinner"></div>
+        <div id="loadingText">Розшифрування відео прямо в браузері... Зачекайте.</div>
+      </div>
+
+      <!-- Alert: Error -->
+      <div id="errorAlert" class="alert alert-error">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span id="errorMsg">Невірний ключ або помилка розшифрування!</span>
+      </div>
+    </div>
+
+    <!-- Video Section (Revealed on successful decryption) -->
+    <div id="videoSection" class="video-section">
+      <div class="cyber-card" style="padding: 16px;">
+        <div class="card-title" style="margin-bottom: 12px; color: var(--neon-green);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+          </svg>
+          <span>Шифр розгадано! Доступ відкрито!</span>
+        </div>
+
+        <div class="video-container">
+          <video id="secretVideo" controls playsinline controlsList="nodownload"></video>
+        </div>
+
+        <div class="video-controls-bar">
+          <button type="button" id="lockAgainBtn" class="btn-secondary danger">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>Заблокувати знову</span>
+          </button>
+          
+          <button type="button" id="fullscreenBtn" class="btn-secondary" style="border-color: var(--border-neon); color: var(--text-white);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+            <span>На весь екран</span>
+          </button>
+        </div>
+
+        <!-- Secret Confirmation Message Box -->
+        <div class="secret-confirmation-card">
+          <div class="confirmation-header">
+            <span>💎 Таємне підтверджувальне послання</span>
+          </div>
+          <h3 style="font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 8px;">
+            ШИФР РОЗГАДАНО ВІРНО! ТИ НА ФІНІШІ! 🏆
+          </h3>
+          <p class="confirmation-instructions">
+            Ти щойно успішно розшифрував ексклюзивне відео квесту! <b>Переможець буде ТІЛЬКИ ОДИН</b> — той, хто першим надішле або прийде з цим підтвердженням! Не зволікай ані секунди:
+          </p>
+
+          <div class="confirmation-code-box">
+            <div class="confirmation-code-label">Твій унікальний ключ підтвердження:</div>
+            <div id="confirmationCodeValue" class="confirmation-code-value">NR-PREMIUM-WINNER-2026</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+            <a id="claimPrizeBtn" href="https://t.me/zyabl1kkk" target="_blank" rel="noopener noreferrer" class="btn-telegram" style="max-width: 100%; height: 52px; font-size: 15px; background: linear-gradient(135deg, #8b5cf6 0%, #229ED9 100%);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+              </svg>
+              <span>🎁 ЗАБРАТИ СВІЙ TELEGRAM PREMIUM (@zyabl1kkk)</span>
+            </a>
+            <button type="button" id="copyConfirmationBtn" class="btn-secondary" style="font-size: 13px;">
+              <span>📋 Скопіювати підтвердження</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; Партія «Новий Рівень». Захищене автономне шифрування AES-256-GCM.</p>
+      <p style="margin-top: 4px;"><a href="index.html" style="color: var(--emerald-400); text-decoration: none;">&larr; Повернутися до програми партії</a></p>
+    </footer>
+  </div>
+
+  <script src="crypto.js"></script>
+  <script src="quest.js"></script>
+</body>
+</html>

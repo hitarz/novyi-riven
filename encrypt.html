@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Генератор & Шифратор Відео — Новий Рівень</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+  <style>
+    .drop-zone {
+      border: 2px dashed var(--border-neon);
+      border-radius: var(--radius-md);
+      padding: 30px 20px;
+      text-align: center;
+      background: rgba(0, 255, 102, 0.03);
+      cursor: pointer;
+      transition: var(--transition);
+      margin-bottom: 20px;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--neon-green);
+      background: rgba(0, 255, 102, 0.08);
+      box-shadow: 0 0 20px var(--neon-green-glow);
+    }
+    .file-info {
+      display: none;
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--neon-green);
+      font-weight: 600;
+    }
+    .generator-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .btn-outline {
+      padding: 0 14px;
+      height: 40px;
+      background: rgba(0, 255, 102, 0.08);
+      border: 1px solid var(--border-neon);
+      border-radius: var(--radius-sm);
+      color: var(--neon-green);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .btn-outline:hover {
+      background: var(--neon-green);
+      color: #060b08;
+      box-shadow: 0 0 12px var(--neon-green-glow);
+    }
+    .success-box {
+      display: none;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--neon-green);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 20px;
+      color: var(--text-white);
+      box-shadow: 0 0 20px var(--neon-green-glow);
+    }
+    .success-box ol {
+      margin-left: 20px;
+      margin-top: 10px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--emerald-400);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-container">
+    <header class="header">
+      <div class="logo-wrapper" style="width: 100px; height: 100px;">
+        <div class="logo-glow-ring"></div>
+        <img src="assets/logo.jpg" alt="Новий Рівень" class="logo-img">
+      </div>
+      <h1 class="brand-title">Шифратор <span>Відео</span></h1>
+      <p class="brand-subtitle">Офлайн утиліта AES-256-GCM</p>
+    </header>
+
+    <div class="cyber-card">
+      <div class="card-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+          <line x1="7" y1="2" x2="7" y2="22"></line>
+          <line x1="17" y1="2" x2="17" y2="22"></line>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <line x1="2" y1="7" x2="7" y2="7"></line>
+          <line x1="2" y1="17" x2="7" y2="17"></line>
+          <line x1="17" y1="17" x2="22" y2="17"></line>
+          <line x1="17" y1="7" x2="22" y2="7"></line>
+        </svg>
+        <span>Крок 1: Виберіть відеофайл</span>
+      </div>
+
+      <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime,video/*" style="display:none;">
+      <div class="drop-zone" id="dropZone">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--neon-green); margin-bottom: 8px;">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <p style="font-size: 15px; font-weight: 600;">Натисніть або перетягніть сюди відео</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Рекомендовано MP4 (H.264), розмір до 50–100 МБ</p>
+        <div id="fileInfo" class="file-info"></div>
+      </div>
+
+      <div class="card-title" style="margin-top: 24px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <span>Крок 2: Пароль (30 символів)</span>
+      </div>
+
+      <div class="generator-row">
+        <button type="button" id="genRandomBtn" class="btn-outline">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 3 21 3 21 8"></polyline>
+            <line x1="4" y1="20" x2="21" y2="3"></line>
+            <polyline points="21 16 21 21 16 21"></polyline>
+            <line x1="15" y1="15" x2="21" y2="21"></line>
+            <line x1="4" y1="4" x2="9" y2="9"></line>
+          </svg>
+          <span>Згенерувати 30 символів</span>
+        </button>
+
+        <button type="button" id="copyPasswordBtn" class="btn-outline">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span>Копіювати пароль</span>
+        </button>
+      </div>
+
+      <div class="input-wrapper">
+        <input 
+          type="text" 
+          id="encryptPasswordInput" 
+          class="password-input" 
+          placeholder="Введіть або згенеруйте ключ..." 
+          style="padding-right: 14px;"
+        >
+      </div>
+
+      <div class="input-meta">
+        <span>Довжина пароля:</span>
+        <span id="encryptCharCount" class="char-counter">0 / 30 символів</span>
+      </div>
+
+      <button type="button" id="startEncryptBtn" class="btn-primary" style="margin-top: 10px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Зашифрувати і завантажити video.enc</span>
+      </button>
+
+      <div id="encryptLoading" class="alert alert-loading">
+        <div class="spinner"></div>
+        <div id="encryptProgressText">Шифрування файлу (Web Crypto AES-GCM)... Зачекайте.</div>
+      </div>
+
+      <div id="encryptError" class="alert alert-error">
+        <span id="encryptErrorMsg">Помилка</span>
+      </div>
+
+      <div id="successBox" class="success-box">
+        <h3 style="color: var(--neon-green); margin-bottom: 8px;">Готово! Файл video.enc збережено.</h3>
+        <p>Що робити далі:</p>
+        <ol>
+          <li>Помістіть завантажений <code>video.enc</code> в папку з сайтом (поруч з <code>index.html</code>).</li>
+          <li>Збережіть ваш 30-значний пароль для загадки / квесту.</li>
+          <li>Тепер відкрийте <a href="index.html" style="color: var(--neon-green); font-weight: bold;">index.html</a> і перевірте введення пароля!</li>
+        </ol>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p><a href="index.html">&larr; Перейти на головну сторінку перегляду</a></p>
+    </footer>
+  </div>
+
+  <script src="crypto.js"></script>
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('videoFileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const passwordInput = document.getElementById('encryptPasswordInput');
+    const charCount = document.getElementById('encryptCharCount');
+    const genRandomBtn = document.getElementById('genRandomBtn');
+    const copyPasswordBtn = document.getElementById('copyPasswordBtn');
+    const startEncryptBtn = document.getElementById('startEncryptBtn');
+    const encryptLoading = document.getElementById('encryptLoading');
+    const encryptError = document.getElementById('encryptError');
+    const encryptErrorMsg = document.getElementById('encryptErrorMsg');
+    const successBox = document.getElementById('successBox');
+
+    let selectedFile = null;
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        setFile(e.target.files[0]);
+      }
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        setFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    function setFile(file) {
+      selectedFile = file;
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+      fileInfo.style.display = 'block';
+      fileInfo.textContent = `Вибрано: ${file.name} (${sizeMb} МБ)`;
+    }
+
+    function updateCount() {
+      const len = passwordInput.value.length;
+      charCount.textContent = `${len} / 30 символів`;
+      if (len === 30) {
+        charCount.classList.add('valid');
+      } else {
+        charCount.classList.remove('valid');
+      }
+    }
+
+    passwordInput.addEventListener('input', updateCount);
+
+    // Генерація рівно 30 випадкових символів (без схожих на кшталт 0/O, l/1)
+    genRandomBtn.addEventListener('click', () => {
+      const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz!@#*+=-';
+      let result = '';
+      const randomValues = new Uint32Array(30);
+      window.crypto.getRandomValues(randomValues);
+      for (let i = 0; i < 30; i++) {
+        result += chars[randomValues[i] % chars.length];
+      }
+      passwordInput.value = result;
+      updateCount();
+    });
+
+    copyPasswordBtn.addEventListener('click', async () => {
+      if (!passwordInput.value) {
+        alert('Спочатку введіть або згенеруйте пароль!');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(passwordInput.value);
+        copyPasswordBtn.innerHTML = `<span>Скопійовано!</span>`;
+        setTimeout(() => {
+          copyPasswordBtn.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span>Копіювати пароль</span>
+          `;
+        }, 2000);
+      } catch (e) {
+        alert('Пароль: ' + passwordInput.value);
+      }
+    });
+
+    startEncryptBtn.addEventListener('click', async () => {
+      encryptError.style.display = 'none';
+      successBox.style.display = 'none';
+
+      if (!selectedFile) {
+        encryptErrorMsg.textContent = 'Будь ласка, виберіть відеофайл!';
+        encryptError.style.display = 'flex';
+        return;
+      }
+
+      const password = passwordInput.value.trim();
+      if (!password) {
+        encryptErrorMsg.textContent = 'Введіть або згенеруйте пароль!';
+        encryptError.style.display = 'flex';
+        return;
+      }
+
+      encryptLoading.style.display = 'flex';
+      startEncryptBtn.disabled = true;
+
+      try {
+        // Читаємо файл
+        const fileBuffer = await selectedFile.arrayBuffer();
+
+        // Шифруємо
+        const encryptedBytes = await window.CryptoHelper.encrypt(fileBuffer, password);
+
+        // Створюємо завантаження video.enc
+        const blob = new Blob([encryptedBytes], { type: 'application/octet-stream' });
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'video.enc';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
+
+        encryptLoading.style.display = 'none';
+        startEncryptBtn.disabled = false;
+        successBox.style.display = 'block';
+
+      } catch (err) {
+        console.error('Encryption error:', err);
+        encryptLoading.style.display = 'none';
+        startEncryptBtn.disabled = false;
+        encryptErrorMsg.textContent = 'Помилка при шифруванні: ' + err.message;
+        encryptError.style.display = 'flex';
+      }
+    });
+  </script>
+</body>
+</html>
