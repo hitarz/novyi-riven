@@ -203,9 +203,27 @@ class HalloweenEventsApp {
               if (!local) {
                 this.costumes.push(rc);
                 changed = true;
-              } else if (rc.image && (!local.image || local.image.startsWith("data:image/svg"))) {
-                local.image = rc.image;
-                changed = true;
+              } else {
+                if (rc.title && local.title !== rc.title) {
+                  local.title = rc.title;
+                  changed = true;
+                }
+                if (rc.grade !== undefined && local.grade !== rc.grade) {
+                  local.grade = rc.grade;
+                  changed = true;
+                }
+                if (rc.desc !== undefined && local.desc !== rc.desc) {
+                  local.desc = rc.desc;
+                  changed = true;
+                }
+                if (rc.num !== undefined && local.num !== rc.num) {
+                  local.num = rc.num;
+                  changed = true;
+                }
+                if (rc.image && (!local.image || local.image.startsWith("data:image/svg") || local.image !== rc.image)) {
+                  local.image = rc.image;
+                  changed = true;
+                }
               }
             });
           }
