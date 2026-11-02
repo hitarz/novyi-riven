@@ -189,7 +189,7 @@ class HalloweenEventsApp {
 
   async checkRemoteData() {
     try {
-      const res = await fetch("costumes.json");
+      const res = await fetch("costumes.json?_t=" + Date.now());
       if (res.ok) {
         const remoteCostumes = await res.json();
         if (Array.isArray(remoteCostumes) && remoteCostumes.length > 0) {

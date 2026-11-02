@@ -65,7 +65,7 @@ class LyceumGalleryApp {
 
   async checkRemoteData() {
     try {
-      const res = await fetch("albums.json");
+      const res = await fetch("albums.json?_t=" + Date.now());
       if (res.ok) {
         const remoteAlbums = await res.json();
         if (Array.isArray(remoteAlbums) && remoteAlbums.length > 0) {
