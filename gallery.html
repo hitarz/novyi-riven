@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#060b08">
+  <title>Галерея ліцею — Партія «Новий Рівень»</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+</head>
+<body>
+
+  <!-- Sticky Global Navigation Bar -->
+  <nav class="site-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-brand">
+        <img src="assets/logo.jpg" alt="Новий Рівень" class="nav-logo-thumb">
+        <div class="nav-brand-text">
+          <span class="nav-brand-title">Новий <span>Рівень</span></span>
+          <span class="nav-brand-sub">Партія на висоті!</span>
+        </div>
+      </a>
+
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>Головна</span>
+        </a>
+
+        <a href="index.html#goals" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Цілі партії</span>
+        </a>
+
+        <a href="events.html" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Івенти</span>
+          <span class="nav-badge-pill">Хеловін</span>
+        </a>
+
+        <a href="gallery.html" class="nav-link active">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <span>Галерея</span>
+        </a>
+
+        <a href="https://t.me/zyabl1kkk" target="_blank" rel="noopener noreferrer" class="nav-link" style="color: var(--emerald-400);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+          </svg>
+          <span>Telegram</span>
+        </a>
+      </div>
+
+      <!-- Mobile hamburger toggle -->
+      <button class="nav-mobile-toggle" id="mobileNavToggle" aria-label="Відкрити меню">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Dropdown -->
+    <div class="mobile-dropdown-menu" id="mobileDropdownMenu">
+      <a href="index.html" class="nav-link">🏠 Головна сторінка</a>
+      <a href="index.html#goals" class="nav-link">🎯 Цілі та Програма партії</a>
+      <a href="events.html" class="nav-link">🎃 Івенти (Битва костюмів)</a>
+      <a href="gallery.html" class="nav-link active">📸 Галерея ліцею за подіями</a>
+      <a href="https://t.me/zyabl1kkk" target="_blank" rel="noopener noreferrer" class="nav-link">✈️ Написати президенту партії</a>
+    </div>
+  </nav>
+
+  <div class="main-container">
+
+    <!-- Folders Overview View (Subfolder catalog) -->
+    <section id="foldersOverviewSection">
+      <div class="section-heading-wrap">
+        <span class="section-kicker">📁 Каталог фотоальбомів</span>
+        <h1 class="section-main-title">Галерея подій ліцею</h1>
+        <p class="section-description">
+          Обирайте папку потрібного івенту, щоб переглянути всі фотографії або додати власні кадри до спільного архіву ліцею.
+        </p>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+        <button class="btn-spotlight-primary admin-only" id="btnOpenUploadPhoto" style="font-size: 13px; padding: 10px 20px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Надіслати фото в альбом</span>
+        </button>
+      </div>
+
+      <!-- Folders Grid -->
+      <div class="gallery-folders-grid" id="galleryFoldersGrid">
+        <!-- Rendered dynamically by gallery.js -->
+      </div>
+    </section>
+
+    <!-- Subfolder Inside View (Viewing photos of a specific event) -->
+    <section id="subfolderViewSection" style="display: none;">
+      <div class="subfolder-header-bar">
+        <div class="breadcrumbs">
+          <span class="breadcrumb-root" id="breadcrumbRoot">📁 Альбоми</span>
+          <span class="breadcrumb-sep">/</span>
+          <span class="breadcrumb-current" id="currentFolderTitle">Назва папки</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button class="btn-back" id="btnBackToFolders" style="cursor: pointer;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>До всіх папок</span>
+          </button>
+
+          <button class="btn-add-costume admin-only" id="btnInsideUploadPhoto" onclick="document.getElementById('btnOpenUploadPhoto').click()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Додати фото</span>
+          </button>
+        </div>
+      </div>
+
+      <div style="margin: 12px 0 20px 4px; font-size: 13px; color: var(--emerald-400);" id="currentFolderMeta">
+        Завантаження вмісту папки...
+      </div>
+
+      <!-- Photos Grid -->
+      <div class="photos-grid" id="photosGrid">
+        <!-- Rendered dynamically by gallery.js -->
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; Партія «Новий Рівень». Всі права захищено.</p>
+      <p style="margin-top: 4px;">
+        <a href="index.html" style="color: var(--emerald-400); text-decoration: none;">Головна</a> • 
+        <a href="events.html" style="color: var(--emerald-400); text-decoration: none;">Івенти (Хеловін)</a> • 
+        <a href="https://t.me/zyabl1kkk" target="_blank" style="color: var(--emerald-400); text-decoration: none;">Написати президенту</a>
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- Fullscreen Lightbox Modal -->
+  <div class="lightbox-modal" id="lightboxModal">
+    <button class="lightbox-close-btn" id="btnCloseLightbox" title="Закрити (Esc)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <div class="lightbox-content-box">
+      <button class="lightbox-nav-btn prev" id="btnPrevPhoto" title="Попереднє фото (←)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
+      <img id="lightboxImg" class="lightbox-img" alt="Фото в повному розмірі">
+
+      <button class="lightbox-nav-btn next" id="btnNextPhoto" title="Наступне фото (→)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal: Upload photo to album -->
+  <div class="modal-overlay" id="uploadPhotoModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>📸</span>
+          <span>Надіслати фото в альбом</span>
+        </h3>
+        <button class="modal-close-btn" id="btnCloseUploadModal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="uploadPhotoForm">
+        <div class="form-group">
+          <label class="form-label" for="targetAlbumSelect">Оберіть папку івенту *</label>
+          <select id="targetAlbumSelect" class="form-select" required>
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 22px;">
+          <label class="form-label">Фотографії * (можна обрати відразу багато)</label>
+          <div class="file-upload-dropzone" id="galleryPhotoDropzone">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--neon-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <div style="font-size: 13px; font-weight: 700; color: #fff;">
+              📁 Оберіть або перетягніть відразу декілька фото (<kbd style="background: rgba(0,255,102,0.18); border: 1px solid var(--neon-green); padding: 2px 6px; border-radius: 4px; font-family: inherit; color: var(--neon-green);">Ctrl + V</kbd>)
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted);" id="multiPhotoStatus">
+              Підтримується масовий вибір файлів (1, 10, 50+ фото за раз)
+            </div>
+          </div>
+          <input type="file" id="galleryPhotoFile" accept="image/*" multiple style="display: none;">
+          <div id="galleryMultiPreviewGrid" class="gallery-multi-preview-grid" style="display: none;"></div>
+          <div id="galleryMultiCount" class="multi-preview-count" style="display: none;"></div>
+        </div>
+
+        <button type="submit" class="btn-submit-modal" id="btnSubmitGalleryPhotos">
+          📤 Завантажити фото в альбом
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+  <script src="gallery.js"></script>
+  <script src="mascot.js"></script>
+</body>
+</html>
