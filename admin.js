@@ -72,7 +72,9 @@
       bar.className = "admin-floating-badge";
       bar.innerHTML = `
         <span class="admin-badge-label">👑 Адмін</span>
-        <button type="button" class="btn-admin-bar-export" id="btnAdminBarExport" title="Завантажити актуальні JSON для git коміту">💾 Зберегти дані</button>
+        <button type="button" class="btn-admin-bar-export" id="btnAdminBarExport" title="Завантажити актуальні JSON для git коміту">💾 Експорт JSON</button>
+        <button type="button" class="btn-admin-bar-export" id="btnAdminBarImport" title="Імпортувати JSON файл">📥 Імпорт JSON</button>
+        <input type="file" id="adminBarFileInput" accept=".json" style="display: none;">
         <button type="button" class="btn-admin-bar-logout" id="btnAdminBarLogout" title="Вийти з адмін-панелі">Вийти ✕</button>
       `;
 
@@ -85,6 +87,43 @@
       document.getElementById("btnAdminBarExport").addEventListener("click", () => {
         this.exportAllData();
       });
+
+      const fileInput = document.getElementById("adminBarFileInput");
+      if (fileInput) {
+        document.getElementById("btnAdminBarImport").addEventListener("click", () => {
+          fileInput.click();
+        });
+
+        fileInput.addEventListener("change", (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            try {
+              const data = JSON.parse(event.target.result);
+              let imported = false;
+              if (Array.isArray(data)) {
+                if (window.halloweenApp && typeof window.halloweenApp.importCostumes === "function") {
+                  window.halloweenApp.importCostumes(data);
+                  imported = true;
+                } else if (window.galleryApp && typeof window.galleryApp.importAlbums === "function") {
+                  window.galleryApp.importAlbums(data);
+                  imported = true;
+                }
+              }
+              if (imported) {
+                this.showAdminToast("✅ Дані успішно імпортовано!");
+              } else {
+                alert("Не вдалося розпізнати формат файлу або поточна сторінка не підтримує цей файл.");
+              }
+            } catch (err) {
+              alert("Помилка читання JSON: " + err.message);
+            }
+            fileInput.value = "";
+          };
+          reader.readAsText(file);
+        });
+      }
     }
 
     removeAdminBar() {

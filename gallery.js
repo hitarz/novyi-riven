@@ -417,6 +417,13 @@ class LyceumGalleryApp {
     console.log("Альбоми експортовано успішно!");
   }
 
+  importAlbums(incoming) {
+    if (!Array.isArray(incoming)) return;
+    this.albums = incoming;
+    this.saveAlbums(this.albums);
+    this.render();
+  }
+
   openFolder(albumId) {
     this.currentAlbumId = albumId;
     if (albumId) {

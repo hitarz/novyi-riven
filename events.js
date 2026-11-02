@@ -312,6 +312,17 @@ class HalloweenEventsApp {
     console.log("Костюми експортовано успішно!");
   }
 
+  importCostumes(incoming) {
+    if (!Array.isArray(incoming)) return;
+    this.costumes = incoming;
+    this.saveCostumes(this.costumes);
+    this.broadcastSync();
+    this.render();
+    if (this.visitorId) {
+      this.initFingerprint();
+    }
+  }
+
   isDefaultTitle(title) {
     if (!title || typeof title !== "string") return true;
     const clean = title.trim().toLowerCase();
