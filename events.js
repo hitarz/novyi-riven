@@ -194,16 +194,21 @@ class HalloweenEventsApp {
         const remoteCostumes = await res.json();
         if (Array.isArray(remoteCostumes) && remoteCostumes.length > 0) {
           let changed = false;
-          remoteCostumes.forEach(rc => {
-            const local = this.costumes.find(c => c.id === rc.id);
-            if (!local) {
-              this.costumes.push(rc);
-              changed = true;
-            } else if (rc.image && (!local.image || local.image.startsWith("data:image/svg"))) {
-              local.image = rc.image;
-              changed = true;
-            }
-          });
+          if (!this.costumes || this.costumes.length === 0) {
+            this.costumes = remoteCostumes;
+            changed = true;
+          } else {
+            remoteCostumes.forEach(rc => {
+              const local = this.costumes.find(c => c.id === rc.id);
+              if (!local) {
+                this.costumes.push(rc);
+                changed = true;
+              } else if (rc.image && (!local.image || local.image.startsWith("data:image/svg"))) {
+                local.image = rc.image;
+                changed = true;
+              }
+            });
+          }
           if (changed) {
             this.saveCostumes(this.costumes);
             this.render();
