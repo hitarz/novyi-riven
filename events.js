@@ -3,6 +3,17 @@
  * Образи завантажуються адміністратором, імена учасників залишаються анонімними (лише костюм та клас).
  */
 
+// Екранування HTML від XSS
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 // Генератор гарних SVG-ілюстрацій за замовчуванням
 function generateCostumeSvg(type, bgGrad1, bgGrad2, accentColor) {
   const icons = {
@@ -218,6 +229,14 @@ class HalloweenEventsApp {
                 }
                 if (rc.num !== undefined && local.num !== rc.num) {
                   local.num = rc.num;
+                  changed = true;
+                }
+                if (rc.votes !== undefined && (local.votes === undefined || rc.votes > (local.votes || 0))) {
+                  local.votes = rc.votes;
+                  changed = true;
+                }
+                if (rc.tags && typeof rc.tags === "object") {
+                  local.tags = Object.assign({}, rc.tags, local.tags || {});
                   changed = true;
                 }
                 if (rc.image && (!local.image || local.image.startsWith("data:image/svg") || local.image !== rc.image)) {
@@ -490,6 +509,7 @@ class HalloweenEventsApp {
     this.editCostumeTitleInput = document.getElementById("editCostumeTitle");
     this.editCostumeGradeInput = document.getElementById("editCostumeGrade");
     this.editCostumeDescInput = document.getElementById("editCostumeDesc");
+    this.editCostumeVotesInput = document.getElementById("editCostumeVotes");
     this.editCostumeThumb = document.getElementById("editCostumeThumb");
     this.editCostumeNumLabel = document.getElementById("editCostumeNumLabel");
     this.btnCloseEditCostumeModal = document.getElementById("btnCloseEditCostumeModal");
@@ -794,10 +814,17 @@ class HalloweenEventsApp {
     if (this.editCostumeTitleInput) this.editCostumeTitleInput.value = this.isDefaultTitle(costume.title) ? "" : costume.title;
     if (this.editCostumeGradeInput) this.editCostumeGradeInput.value = costume.grade || "";
     if (this.editCostumeDescInput) this.editCostumeDescInput.value = costume.desc || "";
+    if (this.editCostumeVotesInput) this.editCostumeVotesInput.value = costume.votes || 0;
     if (this.editCostumeThumb) this.editCostumeThumb.src = costume.image || "";
     if (this.editCostumeNumLabel) {
       this.editCostumeNumLabel.textContent = `🎃 Костюм №${costume.num || ''} — ${this.getCostumeDisplayName(costume)}`;
     }
+  }
+
+  quickAdjustVotes(delta) {
+    if (!this.editCostumeVotesInput) return;
+    const current = parseInt(this.editCostumeVotesInput.value, 10) || 0;
+    this.editCostumeVotesInput.value = Math.max(0, current + delta);
   }
 
   handleSaveEditCostume(e) {
@@ -810,17 +837,21 @@ class HalloweenEventsApp {
     const newTitle = this.editCostumeTitleInput ? this.editCostumeTitleInput.value.trim() : "";
     const newGrade = this.editCostumeGradeInput ? this.editCostumeGradeInput.value.trim() : "";
     const newDesc = this.editCostumeDescInput ? this.editCostumeDescInput.value.trim() : "";
+    const newVotes = this.editCostumeVotesInput ? parseInt(this.editCostumeVotesInput.value, 10) : costume.votes;
 
     costume.title = newTitle || `Костюм №${costume.num}`;
     costume.grade = newGrade;
     costume.desc = newDesc;
+    if (!isNaN(newVotes)) {
+      costume.votes = Math.max(0, newVotes);
+    }
 
     this.saveCostumes(this.costumes);
     this.render();
     this.closeEditCostumeModal();
     this.broadcastSync();
 
-    this.showToastNotification(`✅ Назву оновлено: «${this.getCostumeDisplayName(costume)}»! Натисніть «💾 Експорт JSON» для збереження.`);
+    this.showToastNotification(`✅ Зміни збережено: «${this.getCostumeDisplayName(costume)}» (${costume.votes} голосів)! Натисніть «💾 Експорт JSON».`);
   }
 
   async toggleVote(costumeId) {
@@ -840,13 +871,15 @@ class HalloweenEventsApp {
     if (hasVoted) {
       // Знімаємо голос
       item.voters = item.voters.filter(fp => fp !== this.visitorId);
-      item.votes = Math.max(0, item.voters.length);
+      item.votes = Math.max(0, (item.votes || 1) - 1);
       this.userVotes.delete(costumeId);
       this.showToastNotification("ℹ️ Ви зняли свій голос з цього костюма");
     } else {
       // Фіксуємо голос за цифровим відбитком пристрою (1 голос за костюм з пристрою)
-      item.voters.push(this.visitorId);
-      item.votes = item.voters.length;
+      if (!item.voters.includes(this.visitorId)) {
+        item.voters.push(this.visitorId);
+      }
+      item.votes = (item.votes || 0) + 1;
       this.userVotes.add(costumeId);
       this.triggerVoteSound();
       this.showToastNotification("🎉 Ваш голос враховано! (1 голос за цей костюм)");
@@ -1078,7 +1111,10 @@ class HalloweenEventsApp {
       const rank = rankMap.get(item.id);
       const num = this.getCostumeNumber(item);
       const hasCustomTitle = !this.isDefaultTitle(item.title);
-      const displayName = this.getCostumeDisplayName(item);
+      const rawName = this.getCostumeDisplayName(item);
+      const displayName = escapeHtml(rawName);
+      const gradeHtml = item.grade ? `<span class="costume-class-badge">${escapeHtml(item.grade)}</span>` : '';
+      const descHtml = item.desc ? `<p class="costume-desc">${escapeHtml(item.desc)}</p>` : '';
 
       const tagsMap = item.tags || {};
       const userTags = this.userTagVotes[item.id] || [];
@@ -1087,7 +1123,7 @@ class HalloweenEventsApp {
       const sortedTags = Object.entries(tagsMap).sort((a, b) => b[1] - a[1]);
       const topTagEntry = sortedTags[0];
       const mainTagLabel = topTagEntry && topTagEntry[1] > 0
-        ? `${topTagEntry[0]} • ${topTagEntry[1]}`
+        ? `${escapeHtml(topTagEntry[0])} • ${topTagEntry[1]}`
         : `🏷️ Оцінити тегом`;
 
       // Генерація чіпсів тегів
@@ -1095,12 +1131,12 @@ class HalloweenEventsApp {
       if (sortedTags.length > 0) {
         const chips = sortedTags.map(([tag, count]) => {
           const isUserVoted = userTags.includes(tag);
-          const escapedTag = tag.replace(/'/g, "\\'");
+          const escapedTag = escapeHtml(tag).replace(/'/g, "\\'");
           return `
             <button type="button" class="costume-tag-chip ${isUserVoted ? 'voted' : ''}" 
               onclick="window.halloweenApp.toggleTag('${item.id}', '${escapedTag}')"
               title="${isUserVoted ? 'Ви проголосували за цей тег (натисніть щоб зняти)' : 'Проголосувати за цей тег'}">
-              <span>${tag}</span>
+              <span>${escapeHtml(tag)}</span>
               <span class="tag-chip-count">${count}</span>
             </button>
           `;
@@ -1135,9 +1171,9 @@ class HalloweenEventsApp {
           <div class="costume-content">
             <div class="costume-title-row">
               <h3 class="costume-card-title ${hasCustomTitle ? '' : 'costume-default-title'}">${displayName}</h3>
-              ${item.grade ? `<span class="costume-class-badge">${item.grade}</span>` : ''}
+              ${gradeHtml}
             </div>
-            ${item.desc ? `<p class="costume-desc">${item.desc}</p>` : ''}
+            ${descHtml}
             ${tagsRowHtml}
             <div class="costume-footer">
               <div class="costume-votes-display">

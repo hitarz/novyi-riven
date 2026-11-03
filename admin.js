@@ -4,31 +4,30 @@
  * Для звичайних відвідувачів кнопки завантаження та видалення повністю приховані.
  */
 (function() {
-  const ADMIN_PIN_DEFAULT = "2026";
+  // SHA-256 хеш пароля адміна (2026) — захищає від перегляду пароля в DevTools
+  const ADMIN_PIN_HASH = "158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab";
   const STORAGE_KEY_ADMIN = "novyi_riven_admin_session_v1";
+
+  async function sha256(str) {
+    if (!str) return "";
+    try {
+      const msgBuffer = new TextEncoder().encode(String(str).trim());
+      const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+    } catch (e) {
+      return "";
+    }
+  }
 
   class AdminAuthManager {
     constructor() {
-      this.isAdmin = this.checkAuthStatus();
+      this.isAdmin = this.checkSavedSession();
+      this.checkUrlParam();
       this.initEvents();
       this.applyState();
     }
 
-    checkAuthStatus() {
-      // 1. Перевірка параметра в URL: ?admin=2026 або ?admin=true
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const adminParam = params.get("admin");
-        if (adminParam === ADMIN_PIN_DEFAULT || adminParam === "true" || adminParam === "novyiriven") {
-          localStorage.setItem(STORAGE_KEY_ADMIN, "true");
-          // Прибираємо секретний параметр з адресного рядка, щоб не світити його
-          const cleanUrl = window.location.pathname + window.location.hash;
-          window.history.replaceState({}, document.title, cleanUrl);
-          return true;
-        }
-      } catch (e) {}
-
-      // 2. Перевірка збереженої сесії в localStorage
+    checkSavedSession() {
       try {
         return localStorage.getItem(STORAGE_KEY_ADMIN) === "true";
       } catch (e) {
@@ -36,8 +35,28 @@
       }
     }
 
-    login(pin) {
-      if (pin === ADMIN_PIN_DEFAULT || pin === "novyiriven") {
+    async checkUrlParam() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const adminParam = params.get("admin");
+        if (adminParam) {
+          const h = await sha256(adminParam);
+          if (h === ADMIN_PIN_HASH) {
+            this.isAdmin = true;
+            localStorage.setItem(STORAGE_KEY_ADMIN, "true");
+            this.applyState();
+            this.showAdminToast("👑 Режим адміністратора активовано!");
+          }
+          // Прибираємо секретний параметр з адресного рядка, щоб не світити його
+          const cleanUrl = window.location.pathname + window.location.hash;
+          window.history.replaceState({}, document.title, cleanUrl);
+        }
+      } catch (e) {}
+    }
+
+    async login(pin) {
+      const h = await sha256(pin);
+      if (h === ADMIN_PIN_HASH) {
         this.isAdmin = true;
         localStorage.setItem(STORAGE_KEY_ADMIN, "true");
         this.applyState();
