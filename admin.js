@@ -92,6 +92,7 @@
       bar.innerHTML = `
         <span class="admin-badge-label">👑 Адмін</span>
         <button type="button" class="btn-admin-bar-export" id="btnAdminBarRename" title="Перейменувати або редагувати костюми">✏️ Перейменувати</button>
+        <button type="button" class="btn-admin-bar-export" id="btnAdminBarFirebase" title="Синхронізувати голоси з хмарою Firebase">⚡ Хмара Firebase</button>
         <button type="button" class="btn-admin-bar-export" id="btnAdminBarExport" title="Завантажити актуальні JSON для git коміту">💾 Експорт JSON</button>
         <button type="button" class="btn-admin-bar-export" id="btnAdminBarImport" title="Імпортувати JSON файл">📥 Імпорт JSON</button>
         <input type="file" id="adminBarFileInput" accept=".json" style="display: none;">
@@ -107,6 +108,17 @@
             window.halloweenApp.openEditCostumeModal();
           } else {
             this.showAdminToast("ℹ️ Перейменування костюмів доступне на сторінці Івентів");
+          }
+        });
+      }
+
+      const btnFirebase = document.getElementById("btnAdminBarFirebase");
+      if (btnFirebase) {
+        btnFirebase.addEventListener("click", () => {
+          if (window.halloweenApp && typeof window.halloweenApp.seedFirebaseFromLocal === "function") {
+            window.halloweenApp.seedFirebaseFromLocal();
+          } else {
+            this.showAdminToast("ℹ️ Синхронізація доступна на сторінці Івентів");
           }
         });
       }

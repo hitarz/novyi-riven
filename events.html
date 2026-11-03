@@ -92,7 +92,7 @@
       <div class="spotlight-glow"></div>
       <div class="spotlight-header">
         <span class="spotlight-tag">🎃 Головний івент осені</span>
-        <span class="spotlight-status">Голосування відкрито</span>
+        <span class="spotlight-status" id="liveSyncStatus">Live-голосування онлайн</span>
       </div>
       <h1 class="spotlight-title">Битва Костюмів: Хеловін 2026</h1>
       <p class="spotlight-desc">
@@ -392,6 +392,10 @@
     </div>
   </div>
 
+  <!-- Google Firebase Realtime Database SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <script src="admin.js"></script>
   <script src="events.js"></script>
   <script src="mascot.js"></script>

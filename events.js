@@ -182,6 +182,8 @@ class DeviceFingerprint {
 class HalloweenEventsApp {
   constructor() {
     this.visitorId = null;
+    this.db = null;
+    this.isFirebaseLive = false;
     this.cleanLegacyStorage();
     this.costumes = this.loadCostumes();
     this.userVotes = this.loadUserVotes();
@@ -190,12 +192,15 @@ class HalloweenEventsApp {
     this.currentSort = "votes";
     this.activeTagCostumeId = null;
 
-    this.initFingerprint();
     this.initSyncChannel();
     this.checkRemoteData();
     this.initDOMElements();
     this.attachEvents();
     this.render();
+
+    this.initFingerprint().then(() => {
+      this.initFirebase();
+    });
   }
 
   async checkRemoteData() {
@@ -323,6 +328,125 @@ class HalloweenEventsApp {
         });
       } catch (e) {}
     }
+  }
+
+  initFirebase() {
+    if (typeof firebase === "undefined" || !window.FIREBASE_CONFIG) {
+      console.warn("Firebase SDK або FIREBASE_CONFIG не знайдені, працюємо в локальному режимі.");
+      this.updateLiveIndicator(false);
+      return;
+    }
+
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(window.FIREBASE_CONFIG);
+      }
+      this.db = firebase.database();
+
+      // Індикатор зв'язку із сервером
+      const connectedRef = this.db.ref(".info/connected");
+      connectedRef.on("value", (snap) => {
+        const isOnline = snap.val() === true;
+        this.isFirebaseLive = isOnline;
+        this.updateLiveIndicator(isOnline);
+      });
+
+      // Підписка на живі дані всіх костюмів у реальному часі
+      this.db.ref("costumes_live").on("value", (snapshot) => {
+        const liveData = snapshot.val();
+        if (!liveData) return;
+
+        let changed = false;
+        for (const [id, liveItem] of Object.entries(liveData)) {
+          const local = this.costumes.find(c => c.id === id);
+          if (local && liveItem) {
+            if (typeof liveItem.votes === "number" && local.votes !== liveItem.votes) {
+              local.votes = liveItem.votes;
+              changed = true;
+            }
+            if (liveItem.tags && typeof liveItem.tags === "object") {
+              local.tags = liveItem.tags;
+              changed = true;
+            }
+            if (liveItem.title && local.title !== liveItem.title) {
+              local.title = liveItem.title;
+              changed = true;
+            }
+            if (liveItem.grade !== undefined && local.grade !== liveItem.grade) {
+              local.grade = liveItem.grade;
+              changed = true;
+            }
+            // Синхронізуємо статус вибору для поточного пристрою
+            if (this.visitorId && liveItem.voters && typeof liveItem.voters === "object") {
+              if (liveItem.voters[this.visitorId]) {
+                if (!this.userVotes.has(id)) {
+                  this.userVotes.add(id);
+                  changed = true;
+                }
+              } else {
+                if (this.userVotes.has(id)) {
+                  this.userVotes.delete(id);
+                  changed = true;
+                }
+              }
+            }
+          }
+        }
+
+        if (changed) {
+          this.saveCostumes(this.costumes);
+          this.saveUserVotes();
+          this.render();
+        }
+      });
+    } catch (err) {
+      console.warn("Помилка ініціалізації Firebase:", err);
+      this.isFirebaseLive = false;
+      this.updateLiveIndicator(false);
+    }
+  }
+
+  updateLiveIndicator(isOnline) {
+    const badge = document.getElementById("liveSyncStatus");
+    if (!badge) return;
+    if (isOnline) {
+      badge.textContent = "Live-голосування онлайн ⚡";
+      badge.style.color = "var(--neon-green)";
+    } else {
+      badge.textContent = "Голосування (офлайн/локально)";
+      badge.style.color = "var(--text-muted)";
+    }
+  }
+
+  seedFirebaseFromLocal() {
+    if (!this.db) {
+      alert("Firebase ще не підключено або недоступний.");
+      return;
+    }
+    const payload = {};
+    this.costumes.forEach(c => {
+      const votersMap = {};
+      if (Array.isArray(c.voters)) {
+        c.voters.forEach(v => { votersMap[v] = true; });
+      }
+      payload[c.id] = {
+        num: c.num || 0,
+        title: c.title || "",
+        grade: c.grade || "",
+        votes: c.votes || 0,
+        tags: c.tags || {},
+        voters: votersMap
+      };
+    });
+    this.db.ref("costumes_live").set(payload).then(() => {
+      if (window.adminAuth && typeof window.adminAuth.showAdminToast === "function") {
+        window.adminAuth.showAdminToast("⚡ Всі 27 костюмів синхронізовано з Firebase!");
+      } else {
+        alert("⚡ Всі костюми успішно синхронізовано з хмарою Firebase!");
+      }
+    }).catch(err => {
+      alert("Помилка запису у Firebase: " + err.message);
+    });
   }
 
   showToastNotification(message, duration = 2800) {
@@ -851,6 +975,16 @@ class HalloweenEventsApp {
     this.closeEditCostumeModal();
     this.broadcastSync();
 
+    // Синхронізація оновлених даних з Firebase Realtime Database
+    if (this.db) {
+      this.db.ref("costumes_live/" + costume.id).update({
+        title: costume.title,
+        grade: costume.grade,
+        desc: costume.desc,
+        votes: costume.votes
+      }).catch(err => console.warn("Firebase admin update error:", err));
+    }
+
     this.showToastNotification(`✅ Зміни збережено: «${this.getCostumeDisplayName(costume)}» (${costume.votes} голосів)! Натисніть «💾 Експорт JSON».`);
   }
 
@@ -889,6 +1023,42 @@ class HalloweenEventsApp {
     this.saveUserVotes();
     this.broadcastSync();
     this.render();
+
+    // Атомарна синхронізація голосу у Firebase Realtime Database
+    if (this.db) {
+      const vid = this.visitorId;
+      const costumeRef = this.db.ref("costumes_live/" + costumeId);
+      costumeRef.transaction((current) => {
+        if (!current) {
+          current = {
+            num: item.num || 0,
+            title: item.title || "",
+            grade: item.grade || "",
+            votes: item.votes || 0,
+            tags: item.tags || {},
+            voters: {}
+          };
+        }
+        if (!current.voters) current.voters = {};
+
+        if (hasVoted) {
+          // Зняття голосу
+          if (current.voters[vid]) {
+            delete current.voters[vid];
+            current.votes = Math.max(0, (current.votes || 1) - 1);
+          }
+        } else {
+          // Додавання голосу
+          if (!current.voters[vid]) {
+            current.voters[vid] = true;
+            current.votes = (current.votes || 0) + 1;
+          }
+        }
+        return current;
+      }).catch((err) => {
+        console.warn("Firebase vote transaction error:", err);
+      });
+    }
 
     // Якщо проголосували щойно — пропонуємо обрати теги!
     if (!hasVoted) {
@@ -1280,6 +1450,13 @@ class HalloweenEventsApp {
     this.saveUserTagVotes();
     this.broadcastSync();
     this.render();
+
+    // Синхронізуємо теги з Firebase
+    if (this.db) {
+      this.db.ref("costumes_live/" + costumeId + "/tags").set(costume.tags || {}).catch(err => {
+        console.warn("Firebase tag update error:", err);
+      });
+    }
 
     // Якщо відкрито модалку вибору тегів — оновлюємо стан кнопок
     if (this.activeTagCostumeId === costumeId) {
