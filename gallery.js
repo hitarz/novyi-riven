@@ -76,12 +76,17 @@ class LyceumGalleryApp {
               this.albums.push(ra);
               changed = true;
             } else if (Array.isArray(ra.photos)) {
-              ra.photos.forEach(rp => {
-                if (!localAlbum.photos.some(p => p.id === rp.id)) {
-                  localAlbum.photos.push(rp);
-                  changed = true;
-                }
-              });
+              if (!Array.isArray(localAlbum.photos) || localAlbum.photos.length === 0) {
+                localAlbum.photos = [...ra.photos];
+                changed = true;
+              } else {
+                ra.photos.forEach(rp => {
+                  if (!localAlbum.photos.some(p => p.id === rp.id)) {
+                    localAlbum.photos.push(rp);
+                    changed = true;
+                  }
+                });
+              }
             }
           });
           if (changed) {
