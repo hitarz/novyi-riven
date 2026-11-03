@@ -481,6 +481,19 @@ class HalloweenEventsApp {
     this.presetTagsContainer = document.getElementById("presetTagsContainer");
     this.tagPickerModalTitle = document.getElementById("tagPickerModalTitle");
     this.tagPickerDesc = document.getElementById("tagPickerDesc");
+
+    // Модальне вікно редагування / перейменування костюма (Адмін)
+    this.editCostumeModal = document.getElementById("editCostumeModal");
+    this.editCostumeForm = document.getElementById("editCostumeForm");
+    this.editCostumeSelect = document.getElementById("editCostumeSelect");
+    this.editCostumeIdInput = document.getElementById("editCostumeId");
+    this.editCostumeTitleInput = document.getElementById("editCostumeTitle");
+    this.editCostumeGradeInput = document.getElementById("editCostumeGrade");
+    this.editCostumeDescInput = document.getElementById("editCostumeDesc");
+    this.editCostumeThumb = document.getElementById("editCostumeThumb");
+    this.editCostumeNumLabel = document.getElementById("editCostumeNumLabel");
+    this.btnCloseEditCostumeModal = document.getElementById("btnCloseEditCostumeModal");
+    this.btnCancelEditCostume = document.getElementById("btnCancelEditCostume");
   }
 
   attachEvents() {
@@ -508,8 +521,30 @@ class HalloweenEventsApp {
       if (e.key === "Escape") {
         this.closePhotoPreview();
         this.closeTagPickerModal();
+        this.closeEditCostumeModal();
       }
     });
+
+    // Модальне вікно редагування костюма (Адмін)
+    if (this.btnCloseEditCostumeModal) {
+      this.btnCloseEditCostumeModal.addEventListener("click", () => this.closeEditCostumeModal());
+    }
+    if (this.btnCancelEditCostume) {
+      this.btnCancelEditCostume.addEventListener("click", () => this.closeEditCostumeModal());
+    }
+    if (this.editCostumeModal) {
+      this.editCostumeModal.addEventListener("click", (e) => {
+        if (e.target === this.editCostumeModal) this.closeEditCostumeModal();
+      });
+    }
+    if (this.editCostumeSelect) {
+      this.editCostumeSelect.addEventListener("change", (e) => {
+        this.loadCostumeIntoEditForm(e.target.value);
+      });
+    }
+    if (this.editCostumeForm) {
+      this.editCostumeForm.addEventListener("submit", (e) => this.handleSaveEditCostume(e));
+    }
 
     // Модальне вікно вибору тегів
     if (this.btnCloseTagPickerModal) {
@@ -710,6 +745,84 @@ class HalloweenEventsApp {
     this.render();
   }
 
+  openEditCostumeModal(costumeId) {
+    if (!this.costumes || this.costumes.length === 0) {
+      this.showToastNotification("Немає костюмів для редагування");
+      return;
+    }
+
+    const targetId = costumeId || (this.costumes[0] && this.costumes[0].id);
+    this.populateEditCostumeSelect(targetId);
+    this.loadCostumeIntoEditForm(targetId);
+
+    if (this.editCostumeModal) {
+      this.editCostumeModal.classList.add("open");
+      setTimeout(() => {
+        if (this.editCostumeTitleInput) {
+          this.editCostumeTitleInput.focus();
+          this.editCostumeTitleInput.select();
+        }
+      }, 100);
+    }
+  }
+
+  closeEditCostumeModal() {
+    if (this.editCostumeModal) {
+      this.editCostumeModal.classList.remove("open");
+    }
+    this.editingCostumeId = null;
+  }
+
+  populateEditCostumeSelect(selectedId) {
+    if (!this.editCostumeSelect) return;
+    const sorted = [...this.costumes].sort((a, b) => (b.num || 0) - (a.num || 0));
+    this.editCostumeSelect.innerHTML = sorted.map(c => {
+      const isSelected = c.id === selectedId;
+      const dName = this.getCostumeDisplayName(c);
+      const gradePart = c.grade ? `(${c.grade})` : '';
+      return `<option value="${c.id}" ${isSelected ? 'selected' : ''}>🎃 №${c.num || ''} — ${dName} ${gradePart}</option>`;
+    }).join("");
+  }
+
+  loadCostumeIntoEditForm(costumeId) {
+    const costume = this.costumes.find(c => c.id === costumeId);
+    if (!costume) return;
+
+    this.editingCostumeId = costume.id;
+    if (this.editCostumeSelect) this.editCostumeSelect.value = costume.id;
+    if (this.editCostumeIdInput) this.editCostumeIdInput.value = costume.id;
+    if (this.editCostumeTitleInput) this.editCostumeTitleInput.value = this.isDefaultTitle(costume.title) ? "" : costume.title;
+    if (this.editCostumeGradeInput) this.editCostumeGradeInput.value = costume.grade || "";
+    if (this.editCostumeDescInput) this.editCostumeDescInput.value = costume.desc || "";
+    if (this.editCostumeThumb) this.editCostumeThumb.src = costume.image || "";
+    if (this.editCostumeNumLabel) {
+      this.editCostumeNumLabel.textContent = `🎃 Костюм №${costume.num || ''} — ${this.getCostumeDisplayName(costume)}`;
+    }
+  }
+
+  handleSaveEditCostume(e) {
+    e.preventDefault();
+    if (!this.editingCostumeId) return;
+
+    const costume = this.costumes.find(c => c.id === this.editingCostumeId);
+    if (!costume) return;
+
+    const newTitle = this.editCostumeTitleInput ? this.editCostumeTitleInput.value.trim() : "";
+    const newGrade = this.editCostumeGradeInput ? this.editCostumeGradeInput.value.trim() : "";
+    const newDesc = this.editCostumeDescInput ? this.editCostumeDescInput.value.trim() : "";
+
+    costume.title = newTitle || `Костюм №${costume.num}`;
+    costume.grade = newGrade;
+    costume.desc = newDesc;
+
+    this.saveCostumes(this.costumes);
+    this.render();
+    this.closeEditCostumeModal();
+    this.broadcastSync();
+
+    this.showToastNotification(`✅ Назву оновлено: «${this.getCostumeDisplayName(costume)}»! Натисніть «💾 Експорт JSON» для збереження.`);
+  }
+
   async toggleVote(costumeId) {
     if (!this.visitorId) {
       this.visitorId = await DeviceFingerprint.getFingerprint();
@@ -829,7 +942,10 @@ class HalloweenEventsApp {
             <img src="${top2.image}" alt="${this.getCostumeDisplayName(top2)}" class="podium-avatar">
           </div>
           <div class="podium-info">
-            <div class="podium-costume-name">${this.getCostumeDisplayName(top2)}</div>
+            <div class="podium-costume-name">
+              ${this.getCostumeDisplayName(top2)}
+              <button type="button" class="btn-podium-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${top2.id}')" title="Перейменувати костюм">✏️</button>
+            </div>
             <div class="podium-user-name">${top2.grade ? top2.grade : ''}</div>
           </div>
           <div class="podium-step">
@@ -849,7 +965,10 @@ class HalloweenEventsApp {
             <img src="${top1.image}" alt="${this.getCostumeDisplayName(top1)}" class="podium-avatar">
           </div>
           <div class="podium-info">
-            <div class="podium-costume-name" style="color: #ffd700; font-size: 17px;">${this.getCostumeDisplayName(top1)}</div>
+            <div class="podium-costume-name" style="color: #ffd700; font-size: 17px;">
+              ${this.getCostumeDisplayName(top1)}
+              <button type="button" class="btn-podium-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${top1.id}')" title="Перейменувати костюм">✏️</button>
+            </div>
             <div class="podium-user-name">${top1.grade ? top1.grade : ''}</div>
           </div>
           <div class="podium-step">
@@ -869,7 +988,10 @@ class HalloweenEventsApp {
             <img src="${top3.image}" alt="${this.getCostumeDisplayName(top3)}" class="podium-avatar">
           </div>
           <div class="podium-info">
-            <div class="podium-costume-name">${this.getCostumeDisplayName(top3)}</div>
+            <div class="podium-costume-name">
+              ${this.getCostumeDisplayName(top3)}
+              <button type="button" class="btn-podium-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${top3.id}')" title="Перейменувати костюм">✏️</button>
+            </div>
             <div class="podium-user-name">${top3.grade ? top3.grade : ''}</div>
           </div>
           <div class="podium-step">
@@ -894,7 +1016,10 @@ class HalloweenEventsApp {
               <span class="lb-rank">#${index + 4}</span>
               <img src="${item.image}" alt="${this.getCostumeDisplayName(item)}" class="lb-thumb" onclick="window.halloweenApp.openCostumeById('${item.id}')" style="cursor: zoom-in;" title="Переглянути фото на весь екран">
               <div class="lb-details">
-                <span class="lb-costume">${this.getCostumeDisplayName(item)}</span>
+                <span class="lb-costume">
+                  ${this.getCostumeDisplayName(item)}
+                  <button type="button" class="btn-lb-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${item.id}')" title="Перейменувати костюм">✏️</button>
+                </span>
                 <span class="lb-author">${item.grade ? item.grade : ''}</span>
               </div>
             </div>
@@ -1020,6 +1145,12 @@ class HalloweenEventsApp {
                 <span class="vote-label">голосів</span>
               </div>
               <div class="costume-footer-actions">
+                <button type="button" class="btn-card-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${item.id}')" title="Перейменувати / редагувати костюм">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
                 <button type="button" class="btn-card-delete admin-only" onclick="window.halloweenApp.deleteCostume('${item.id}')" title="Видалити костюм">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#060b08">
   <title>Івенти та Битва Костюмів — Партія «Новий Рівень»</title>
-  <link rel="stylesheet" href="style.css?v=2.6">
+  <link rel="stylesheet" href="style.css?v=2.7">
   <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
 </head>
 <body>
@@ -98,7 +98,49 @@
       <p class="spotlight-desc">
         Сьогодні наш ліцей перетворився на арену містики, креативу та кібер-магії! Оцінюйте образи однокласників та друзів, виводьте фаворитів на вершину п'єдесталу або додайте власний костюм до конкурсу.
       </p>
-      <div class="spotlight-actions">
+
+      <!-- Prizes & Contest Conditions Banner -->
+      <div class="event-prizes-highlight">
+        <div class="prize-highlight-badge">
+          <span>🎁</span>
+          <span>Умови конкурсу та нагороди</span>
+        </div>
+        <h3 class="prize-highlight-title">
+          <span>🏆</span>
+          <span>Перші три місця отримають призи!</span>
+        </h3>
+        <p class="prize-highlight-text">
+          Партія «Новий Рівень» підготувала цінні нагороди та подарунки для авторів найкращих образів ліцею:
+        </p>
+        <div class="prizes-grid">
+          <div class="prize-item gold">
+            <span class="prize-medal">🥇</span>
+            <div class="prize-item-info">
+              <span class="prize-item-rank">1-ше місце</span>
+              <span class="prize-item-reward">Головний приз переможця</span>
+            </div>
+          </div>
+          <div class="prize-item silver">
+            <span class="prize-medal">🥈</span>
+            <div class="prize-item-info">
+              <span class="prize-item-rank">2-ге місце</span>
+              <span class="prize-item-reward">Святковий цінний приз</span>
+            </div>
+          </div>
+          <div class="prize-item bronze">
+            <span class="prize-medal">🥉</span>
+            <div class="prize-item-info">
+              <span class="prize-item-rank">3-тє місце</span>
+              <span class="prize-item-reward">Спеціальний пам'ятний приз</span>
+            </div>
+          </div>
+        </div>
+        <p class="prize-highlight-note">
+          ⚡ Переможці визначаються виключно за голосами ліцеїстів. Підтримуйте своїх фаворитів!
+        </p>
+      </div>
+
+      <div class="spotlight-actions" style="margin-top: 16px;">
         <a href="#votingSection" class="btn-spotlight-primary">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -116,6 +158,12 @@
         <p class="section-description">
           Трійка лідерів оновлюється миттєво після кожного вашого кліку. Всього віддано голосів: <b id="totalVotesStat" style="color: var(--neon-green);">...</b>
         </p>
+      </div>
+
+      <!-- Podium Prize Announcement Ribbon -->
+      <div class="podium-prize-announcement">
+        <span>🏆</span>
+        <span><b>Призові місця:</b> Перші 3 місця рейтингу отримають цінні призи від партії «Новий Рівень»!</span>
       </div>
 
       <!-- Podium 1, 2, 3 places -->
@@ -297,6 +345,67 @@
           ✓ Готово
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal: Редагування / Перейменування костюма (Тільки для адміна) -->
+  <div class="modal-overlay" id="editCostumeModal">
+    <div class="modal-container" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span>✏️</span>
+          <span>Редагувати / Перейменувати костюм</span>
+        </h3>
+        <button class="modal-close-btn" id="btnCloseEditCostumeModal" title="Закрити (Esc)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="editCostumeForm" class="upload-form" style="padding-top: 10px;">
+        <input type="hidden" id="editCostumeId">
+        
+        <div class="form-group">
+          <label class="form-label" for="editCostumeSelect">Оберіть костюм для редагування:</label>
+          <select id="editCostumeSelect" class="form-input" style="font-weight: 700; color: #fff; background: rgba(14,25,17,0.95); cursor: pointer;">
+            <!-- Populated dynamically by events.js -->
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px; padding: 12px; background: rgba(0,0,0,0.35); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <img id="editCostumeThumb" src="" alt="" style="width: 56px; height: 56px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-glow); flex-shrink: 0;">
+          <div>
+            <div id="editCostumeNumLabel" style="font-size: 13px; font-weight: 800; color: var(--neon-green);">🎃 Костюм</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Введіть нову назву образу або клас нижче:</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="editCostumeTitle">Назва костюма / образу:</label>
+          <input type="text" id="editCostumeTitle" class="form-input" placeholder="Наприклад: Джокер, Чорт, Слендермен" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="editCostumeGrade">Клас або категорія (необов'язково):</label>
+          <input type="text" id="editCostumeGrade" class="form-input" placeholder="Наприклад: 11-Б, 10-А, Вчитель">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="editCostumeDesc">Короткий опис (необов'язково):</label>
+          <textarea id="editCostumeDesc" class="form-textarea" rows="2" placeholder="Опис деталей образу"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 14px;">
+          <button type="button" class="btn-spotlight-secondary" id="btnCancelEditCostume" style="flex: 1; justify-content: center; margin: 0;">
+            Скасувати
+          </button>
+          <button type="submit" class="btn-submit-modal" id="btnSaveEditCostume" style="flex: 2; margin: 0;">
+            💾 Зберегти зміни
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 

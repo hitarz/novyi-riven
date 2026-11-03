@@ -72,6 +72,7 @@
       bar.className = "admin-floating-badge";
       bar.innerHTML = `
         <span class="admin-badge-label">👑 Адмін</span>
+        <button type="button" class="btn-admin-bar-export" id="btnAdminBarRename" title="Перейменувати або редагувати костюми">✏️ Перейменувати</button>
         <button type="button" class="btn-admin-bar-export" id="btnAdminBarExport" title="Завантажити актуальні JSON для git коміту">💾 Експорт JSON</button>
         <button type="button" class="btn-admin-bar-export" id="btnAdminBarImport" title="Імпортувати JSON файл">📥 Імпорт JSON</button>
         <input type="file" id="adminBarFileInput" accept=".json" style="display: none;">
@@ -79,6 +80,17 @@
       `;
 
       document.body.appendChild(bar);
+
+      const btnRename = document.getElementById("btnAdminBarRename");
+      if (btnRename) {
+        btnRename.addEventListener("click", () => {
+          if (window.halloweenApp && typeof window.halloweenApp.openEditCostumeModal === "function") {
+            window.halloweenApp.openEditCostumeModal();
+          } else {
+            this.showAdminToast("ℹ️ Перейменування костюмів доступне на сторінці Івентів");
+          }
+        });
+      }
 
       document.getElementById("btnAdminBarLogout").addEventListener("click", () => {
         this.logout();
