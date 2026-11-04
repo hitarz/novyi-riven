@@ -74,10 +74,86 @@ const PRESET_TAGS = [
  * 5. Апаратні потоки (CPU cores, touch points, часовий пояс)
  */
 class DeviceFingerprint {
+  static getPersistentToken() {
+    const KEY = "novyi_riven_voter_token_v3";
+    let token = null;
+    try {
+      token = localStorage.getItem(KEY);
+    } catch (e) {}
+
+    if (!token) {
+      try {
+        const match = document.cookie.match(new RegExp('(?:^|; )' + KEY + '=([^;]*)'));
+        if (match) token = decodeURIComponent(match[1]);
+      } catch (e) {}
+    }
+
+    if (!token) {
+      try {
+        const array = new Uint8Array(16);
+        if (window.crypto && window.crypto.getRandomValues) {
+          window.crypto.getRandomValues(array);
+          token = Array.from(array, b => b.toString(16).padStart(2, "0")).join("");
+        } else {
+          token = "vtr_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
+        }
+      } catch (e) {
+        token = "vtr_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
+      }
+    }
+
+    try {
+      localStorage.setItem(KEY, token);
+    } catch (e) {}
+    try {
+      const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `${KEY}=${encodeURIComponent(token)}; expires=${expires}; path=/; SameSite=Lax`;
+    } catch (e) {}
+
+    return token;
+  }
+
+  static async getClientIp() {
+    if (this._cachedIp) return this._cachedIp;
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 2000);
+      const res = await fetch("https://api.ipify.org?format=json", { signal: ctrl.signal });
+      clearTimeout(t);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.ip) {
+          this._cachedIp = data.ip;
+          return data.ip;
+        }
+      }
+    } catch (e) {}
+    return "";
+  }
+
+  static async getClientIpKey() {
+    if (this._cachedIpKey) return this._cachedIpKey;
+    const ip = await this.getClientIp();
+    if (!ip) return "";
+    this._cachedIpKey = "ip_" + ip.replace(/[^a-zA-Z0-9]/g, "_");
+    return this._cachedIpKey;
+  }
+
   static async getFingerprint() {
     if (this._cached) return this._cached;
 
+    const CACHE_KEY = "novyi_riven_visitor_id_v3";
+    try {
+      const stored = localStorage.getItem(CACHE_KEY);
+      if (stored && stored.startsWith("fp_")) {
+        this._cached = stored;
+        return this._cached;
+      }
+    } catch (e) {}
+
     const components = [];
+    const token = this.getPersistentToken();
+    components.push(`token:${token}`);
 
     // 1. Апаратний профіль екрана та заліза
     try {
@@ -122,37 +198,6 @@ class DeviceFingerprint {
       }
     } catch (e) {}
 
-    // 4. AudioContext fingerprint
-    try {
-      const AudioCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-      if (AudioCtx) {
-        const context = new AudioCtx(1, 44100, 44100);
-        const oscillator = context.createOscillator();
-        oscillator.type = "triangle";
-        oscillator.frequency.setValueAtTime(10000, context.currentTime);
-
-        const compressor = context.createDynamicsCompressor();
-        compressor.threshold.setValueAtTime(-50, context.currentTime);
-        compressor.knee.setValueAtTime(40, context.currentTime);
-        compressor.ratio.setValueAtTime(12, context.currentTime);
-        compressor.reduction.setValueAtTime(-20, context.currentTime);
-        compressor.attack.setValueAtTime(0, context.currentTime);
-        compressor.release.setValueAtTime(0.25, context.currentTime);
-
-        oscillator.connect(compressor);
-        compressor.connect(context.destination);
-        oscillator.start(0);
-
-        const renderedBuffer = await context.startRendering();
-        const samples = renderedBuffer.getChannelData(0).slice(4500, 5000);
-        let audioSum = 0;
-        for (let i = 0; i < samples.length; i++) {
-          audioSum += Math.abs(samples[i]);
-        }
-        components.push(`audio:${audioSum.toFixed(6)}`);
-      }
-    } catch (e) {}
-
     const rawString = components.join("||");
 
     // Хешування в SHA-256
@@ -175,6 +220,10 @@ class DeviceFingerprint {
     }
 
     this._cached = "fp_" + hash.slice(0, 24);
+    try {
+      localStorage.setItem(CACHE_KEY, this._cached);
+    } catch (e) {}
+
     return this._cached;
   }
 }
@@ -270,26 +319,22 @@ class HalloweenEventsApp {
   async initFingerprint() {
     try {
       this.visitorId = await DeviceFingerprint.getFingerprint();
+      this.clientIpKey = await DeviceFingerprint.getClientIpKey();
+
       // Синхронізуємо локальні голоси з унікальним цифровим відбитком пристрою
-      let changed = false;
       this.costumes.forEach(c => {
         if (!Array.isArray(c.voters)) {
           c.voters = [];
         }
         if (this.userVotes.has(c.id) && !c.voters.includes(this.visitorId)) {
           c.voters.push(this.visitorId);
-          changed = true;
         } else if (c.voters.includes(this.visitorId) && !this.userVotes.has(c.id)) {
           this.userVotes.add(c.id);
-          changed = true;
         }
-        c.votes = Math.max(c.votes || 0, c.voters.length);
       });
-      if (changed) {
-        this.saveCostumes(this.costumes);
-        this.saveUserVotes();
-        this.render();
-      }
+      this.saveCostumes(this.costumes);
+      this.saveUserVotes();
+      this.render();
     } catch (e) {
       console.warn("Помилка генерації цифрового відбитка:", e);
     }
@@ -305,9 +350,9 @@ class HalloweenEventsApp {
             if (Array.isArray(incoming)) {
               this.costumes = incoming;
               if (this.visitorId) {
-                this.userVotes = new Set(
-                  this.costumes.filter(c => (c.voters || []).includes(this.visitorId)).map(c => c.id)
-                );
+                this.costumes
+                  .filter(c => (c.voters || []).includes(this.visitorId))
+                  .forEach(c => this.userVotes.add(c.id));
               }
               this.saveCostumes(this.costumes);
               this.saveUserVotes();
@@ -409,18 +454,13 @@ class HalloweenEventsApp {
               local.image = liveItem.image;
               changed = true;
             }
-            // Синхронізуємо статус вибору для поточного пристрою
-            if (this.visitorId && liveItem.voters && typeof liveItem.voters === "object") {
-              if (liveItem.voters[this.visitorId]) {
-                if (!this.userVotes.has(id)) {
-                  this.userVotes.add(id);
-                  changed = true;
-                }
-              } else {
-                if (this.userVotes.has(id)) {
-                  this.userVotes.delete(id);
-                  changed = true;
-                }
+            // Синхронізуємо статус вибору для поточного пристрою (тільки додаємо підтверджені голоси)
+            if (liveItem.voters && typeof liveItem.voters === "object") {
+              const hasInDb = (this.visitorId && liveItem.voters[this.visitorId]) ||
+                              (this.clientIpKey && liveItem.voters_ip && liveItem.voters_ip[this.clientIpKey]);
+              if (hasInDb && !this.userVotes.has(id)) {
+                this.userVotes.add(id);
+                changed = true;
               }
             }
           }
@@ -611,18 +651,28 @@ class HalloweenEventsApp {
   }
 
   loadUserVotes() {
+    const votes = new Set();
     try {
       const data = localStorage.getItem(STORAGE_KEY_VOTES);
       if (data) {
-        return new Set(JSON.parse(data));
+        JSON.parse(data).forEach(id => votes.add(id));
       }
     } catch (e) {}
-    return new Set();
+    try {
+      const match = document.cookie.match(/(?:^|; )novyi_riven_user_votes=([^;]*)/);
+      if (match) {
+        JSON.parse(decodeURIComponent(match[1])).forEach(id => votes.add(id));
+      }
+    } catch (e) {}
+    return votes;
   }
 
   saveUserVotes() {
     try {
-      localStorage.setItem(STORAGE_KEY_VOTES, JSON.stringify(Array.from(this.userVotes)));
+      const arr = Array.from(this.userVotes);
+      localStorage.setItem(STORAGE_KEY_VOTES, JSON.stringify(arr));
+      const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `novyi_riven_user_votes=${encodeURIComponent(JSON.stringify(arr))}; expires=${expires}; path=/; SameSite=Lax`;
     } catch (e) {}
   }
 
@@ -1148,6 +1198,9 @@ class HalloweenEventsApp {
     if (!this.visitorId) {
       this.visitorId = await DeviceFingerprint.getFingerprint();
     }
+    if (!this.clientIpKey && DeviceFingerprint.getClientIpKey) {
+      this.clientIpKey = await DeviceFingerprint.getClientIpKey();
+    }
 
     const item = this.costumes.find(c => c.id === costumeId);
     if (!item) return;
@@ -1180,10 +1233,13 @@ class HalloweenEventsApp {
     this.broadcastSync();
     this.render();
 
-    // Атомарна синхронізація голосу у Firebase Realtime Database
+    // Атомарна синхронізація голосу у Firebase Realtime Database з захистом за відбитком та IP
     if (this.db) {
       const vid = this.visitorId;
+      const ipKey = this.clientIpKey;
       const costumeRef = this.db.ref("costumes_live/" + costumeId);
+      let rejectedAlreadyVoted = false;
+
       costumeRef.transaction((current) => {
         if (!current) {
           current = {
@@ -1192,27 +1248,49 @@ class HalloweenEventsApp {
             grade: item.grade || "",
             votes: item.votes || 0,
             tags: item.tags || {},
-            voters: {}
+            voters: {},
+            voters_ip: {}
           };
         }
         if (!current.voters) current.voters = {};
+        if (!current.voters_ip) current.voters_ip = {};
 
         if (hasVoted) {
           // Зняття голосу
-          if (current.voters[vid]) {
+          let changed = false;
+          if (vid && current.voters[vid]) {
             delete current.voters[vid];
+            changed = true;
+          }
+          if (ipKey && current.voters_ip[ipKey]) {
+            delete current.voters_ip[ipKey];
+            changed = true;
+          }
+          if (changed) {
             current.votes = Math.max(0, (current.votes || 1) - 1);
           }
         } else {
-          // Додавання голосу
-          if (!current.voters[vid]) {
-            current.voters[vid] = true;
-            current.votes = (current.votes || 0) + 1;
+          // Додавання голосу: перевірка на повторний голос за відбитком пристрою або IP
+          const alreadyByDevice = vid && current.voters[vid];
+          const alreadyByIp = ipKey && current.voters_ip[ipKey];
+          if (alreadyByDevice || alreadyByIp) {
+            rejectedAlreadyVoted = true;
+            return current;
           }
+          if (vid) current.voters[vid] = true;
+          if (ipKey) current.voters_ip[ipKey] = true;
+          current.votes = (current.votes || 0) + 1;
         }
         return current;
-      }).catch((err) => {
-        console.warn("Firebase vote transaction error:", err);
+      }, (error, committed) => {
+        if (error) {
+          console.warn("Firebase vote transaction error:", error);
+        } else if (rejectedAlreadyVoted) {
+          this.userVotes.add(costumeId);
+          this.saveUserVotes();
+          this.render();
+          this.showToastNotification("⚠️ З вашого пристрою або мережі вже віддано голос за цей костюм!");
+        }
       });
     }
 
