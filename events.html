@@ -348,11 +348,17 @@
           </select>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px; padding: 12px; background: rgba(0,0,0,0.35); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-          <img id="editCostumeThumb" src="" alt="" style="width: 56px; height: 56px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-glow); flex-shrink: 0;">
-          <div>
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px; padding: 12px; background: rgba(0,0,0,0.35); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); flex-wrap: wrap;">
+          <img id="editCostumeThumb" src="" alt="" style="width: 68px; height: 68px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-glow); flex-shrink: 0;">
+          <div style="flex: 1; min-width: 170px;">
             <div id="editCostumeNumLabel" style="font-size: 13px; font-weight: 800; color: var(--neon-green);">🎃 Костюм</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Введіть нову назву образу або клас нижче:</div>
+            <div style="display: flex; gap: 8px; margin-top: 6px; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="btn-outline" id="btnChangeEditPhoto" style="height: 32px; padding: 0 10px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                📷 Замінити фото
+              </button>
+              <span id="editPhotoStatus" style="font-size: 11px; color: var(--text-muted);">або Ctrl+V</span>
+            </div>
+            <input type="file" id="editCostumeFileInput" accept="image/*" style="display: none;">
           </div>
         </div>
 

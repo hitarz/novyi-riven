@@ -357,9 +357,29 @@ class HalloweenEventsApp {
         if (!liveData) return;
 
         let changed = false;
+        const liveIds = new Set(Object.keys(liveData));
+
+        // 1. Оновлюємо або створюємо костюми з хмари на льоту
         for (const [id, liveItem] of Object.entries(liveData)) {
-          const local = this.costumes.find(c => c.id === id);
-          if (local && liveItem) {
+          let local = this.costumes.find(c => c.id === id);
+          if (!local) {
+            // Новий костюм, доданий онлайн без необхідності робити git коміт!
+            local = {
+              id: id,
+              num: liveItem.num || 0,
+              title: liveItem.title || `Костюм №${liveItem.num || ''}`,
+              grade: liveItem.grade || "",
+              desc: liveItem.desc || "",
+              votes: typeof liveItem.votes === "number" ? liveItem.votes : 0,
+              tags: liveItem.tags || {},
+              image: liveItem.image || "",
+              date: liveItem.date || new Date().toISOString().split("T")[0],
+              voters: liveItem.voters ? Object.keys(liveItem.voters) : []
+            };
+            this.costumes.unshift(local);
+            changed = true;
+          } else {
+            // Оновлюємо існуючий костюм
             if (typeof liveItem.votes === "number" && local.votes !== liveItem.votes) {
               local.votes = liveItem.votes;
               changed = true;
@@ -376,6 +396,19 @@ class HalloweenEventsApp {
               local.grade = liveItem.grade;
               changed = true;
             }
+            if (liveItem.desc !== undefined && local.desc !== liveItem.desc) {
+              local.desc = liveItem.desc;
+              changed = true;
+            }
+            if (liveItem.num !== undefined && local.num !== liveItem.num) {
+              local.num = liveItem.num;
+              changed = true;
+            }
+            // Оновлення фотографії, якщо вона була змінена в Firebase
+            if (liveItem.image && local.image !== liveItem.image) {
+              local.image = liveItem.image;
+              changed = true;
+            }
             // Синхронізуємо статус вибору для поточного пристрою
             if (this.visitorId && liveItem.voters && typeof liveItem.voters === "object") {
               if (liveItem.voters[this.visitorId]) {
@@ -390,6 +423,15 @@ class HalloweenEventsApp {
                 }
               }
             }
+          }
+        }
+
+        // 2. Видаляємо костюми, які були видалені в хмарі
+        if (liveIds.size > 0) {
+          const beforeCount = this.costumes.length;
+          this.costumes = this.costumes.filter(c => liveIds.has(c.id));
+          if (this.costumes.length !== beforeCount) {
+            changed = true;
           }
         }
 
@@ -430,19 +472,24 @@ class HalloweenEventsApp {
         c.voters.forEach(v => { votersMap[v] = true; });
       }
       payload[c.id] = {
+        id: c.id,
         num: c.num || 0,
         title: c.title || "",
         grade: c.grade || "",
+        desc: c.desc || "",
         votes: c.votes || 0,
         tags: c.tags || {},
+        image: c.image || "",
+        date: c.date || "",
         voters: votersMap
       };
     });
     this.db.ref("costumes_live").set(payload).then(() => {
+      const msg = `⚡ Всі ${this.costumes.length} костюмів синхронізовано з хмарою Firebase!`;
       if (window.adminAuth && typeof window.adminAuth.showAdminToast === "function") {
-        window.adminAuth.showAdminToast("⚡ Всі 27 костюмів синхронізовано з Firebase!");
+        window.adminAuth.showAdminToast(msg);
       } else {
-        alert("⚡ Всі костюми успішно синхронізовано з хмарою Firebase!");
+        alert(msg);
       }
     }).catch(err => {
       alert("Помилка запису у Firebase: " + err.message);
@@ -636,6 +683,10 @@ class HalloweenEventsApp {
     this.editCostumeVotesInput = document.getElementById("editCostumeVotes");
     this.editCostumeThumb = document.getElementById("editCostumeThumb");
     this.editCostumeNumLabel = document.getElementById("editCostumeNumLabel");
+    this.btnChangeEditPhoto = document.getElementById("btnChangeEditPhoto");
+    this.editCostumeFileInput = document.getElementById("editCostumeFileInput");
+    this.editPhotoStatus = document.getElementById("editPhotoStatus");
+    this.newEditPhotoData = null;
     this.btnCloseEditCostumeModal = document.getElementById("btnCloseEditCostumeModal");
     this.btnCancelEditCostume = document.getElementById("btnCancelEditCostume");
   }
@@ -689,6 +740,63 @@ class HalloweenEventsApp {
     if (this.editCostumeForm) {
       this.editCostumeForm.addEventListener("submit", (e) => this.handleSaveEditCostume(e));
     }
+
+    // Заміна фотографії у формі редагування (вибір файлу)
+    if (this.btnChangeEditPhoto && this.editCostumeFileInput) {
+      this.btnChangeEditPhoto.addEventListener("click", () => {
+        this.editCostumeFileInput.click();
+      });
+
+      this.editCostumeFileInput.addEventListener("change", async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        try {
+          if (this.editPhotoStatus) this.editPhotoStatus.textContent = "⏳ Стиснення...";
+          const compressed = await this.compressImageFile(file);
+          this.newEditPhotoData = compressed;
+          if (this.editCostumeThumb) this.editCostumeThumb.src = compressed;
+          if (this.editPhotoStatus) this.editPhotoStatus.textContent = "✅ Фото обрано!";
+        } catch (err) {
+          console.error("Помилка обробки фото:", err);
+          if (this.editPhotoStatus) this.editPhotoStatus.textContent = "❌ Помилка файлу";
+        }
+        this.editCostumeFileInput.value = "";
+      });
+    }
+
+    // Підтримка Ctrl + V для миттєвої вставки фотографії у формі редагування
+    window.addEventListener("paste", async (e) => {
+      if (this.editCostumeModal && this.editCostumeModal.classList.contains("open")) {
+        const clipboardData = e.clipboardData || window.clipboardData;
+        if (!clipboardData) return;
+        let imageFile = null;
+        if (clipboardData.items) {
+          for (let i = 0; i < clipboardData.items.length; i++) {
+            if (clipboardData.items[i].type && clipboardData.items[i].type.startsWith("image/")) {
+              imageFile = clipboardData.items[i].getAsFile();
+              break;
+            }
+          }
+        }
+        if (!imageFile && clipboardData.files && clipboardData.files.length > 0) {
+          if (clipboardData.files[0].type && clipboardData.files[0].type.startsWith("image/")) {
+            imageFile = clipboardData.files[0];
+          }
+        }
+        if (imageFile) {
+          e.preventDefault();
+          try {
+            if (this.editPhotoStatus) this.editPhotoStatus.textContent = "⏳ Вставка з буфера...";
+            const compressed = await this.compressImageFile(imageFile);
+            this.newEditPhotoData = compressed;
+            if (this.editCostumeThumb) this.editCostumeThumb.src = compressed;
+            if (this.editPhotoStatus) this.editPhotoStatus.textContent = "✅ Вставлено через Ctrl + V!";
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      }
+    });
 
     // Модальне вікно вибору тегів
     if (this.btnCloseTagPickerModal) {
@@ -865,6 +973,28 @@ class HalloweenEventsApp {
     this.saveUserVotes();
     this.broadcastSync();
 
+    // Миттєва публікація нового костюма в Firebase Realtime Database
+    if (this.db) {
+      const votersObj = {};
+      if (this.visitorId) votersObj[this.visitorId] = true;
+      this.db.ref("costumes_live/" + newCostume.id).set({
+        id: newCostume.id,
+        num: newCostume.num,
+        title: newCostume.title,
+        grade: newCostume.grade,
+        desc: newCostume.desc || "",
+        votes: newCostume.votes,
+        tags: newCostume.tags || {},
+        image: newCostume.image,
+        date: newCostume.date,
+        voters: votersObj
+      }).then(() => {
+        this.showToastNotification(`🎉 «${newCostume.title}» додано наживо для всіх учнів (без коміту)!`);
+      }).catch(err => {
+        console.error("Firebase create costume error:", err);
+      });
+    }
+
     this.modalOverlay.classList.remove("open");
     this.addCostumeForm.reset();
     this.photoPreview.style.display = "none";
@@ -887,6 +1017,13 @@ class HalloweenEventsApp {
     this.saveUserTagVotes();
     this.broadcastSync();
     this.render();
+
+    // Видаляємо з Firebase Realtime Database
+    if (this.db) {
+      this.db.ref("costumes_live/" + costumeId).remove().then(() => {
+        this.showToastNotification(`🗑️ «${name}» видалено з конкурсу`);
+      }).catch(err => console.error("Firebase delete error:", err));
+    }
   }
 
   openEditCostumeModal(costumeId) {
@@ -943,6 +1080,8 @@ class HalloweenEventsApp {
     if (this.editCostumeNumLabel) {
       this.editCostumeNumLabel.textContent = `🎃 Костюм №${costume.num || ''} — ${this.getCostumeDisplayName(costume)}`;
     }
+    this.newEditPhotoData = null;
+    if (this.editPhotoStatus) this.editPhotoStatus.textContent = "або Ctrl + V";
   }
 
   quickAdjustVotes(delta) {
@@ -969,6 +1108,10 @@ class HalloweenEventsApp {
     if (!isNaN(newVotes)) {
       costume.votes = Math.max(0, newVotes);
     }
+    const photoUpdated = !!this.newEditPhotoData;
+    if (photoUpdated) {
+      costume.image = this.newEditPhotoData;
+    }
 
     this.saveCostumes(this.costumes);
     this.render();
@@ -977,15 +1120,28 @@ class HalloweenEventsApp {
 
     // Синхронізація оновлених даних з Firebase Realtime Database
     if (this.db) {
-      this.db.ref("costumes_live/" + costume.id).update({
+      const updateData = {
         title: costume.title,
         grade: costume.grade,
         desc: costume.desc,
         votes: costume.votes
-      }).catch(err => console.warn("Firebase admin update error:", err));
+      };
+      if (photoUpdated) {
+        updateData.image = costume.image;
+      }
+      this.db.ref("costumes_live/" + costume.id).update(updateData)
+        .then(() => {
+          this.showToastNotification(`⚡ «${this.getCostumeDisplayName(costume)}» ${photoUpdated ? 'із новим фото ' : ''}миттєво оновлено для всіх (без коміту)!`);
+        })
+        .catch(err => {
+          console.warn("Firebase admin update error:", err);
+          this.showToastNotification(`✅ Зміни збережено локально`);
+        });
+    } else {
+      this.showToastNotification(`✅ Зміни збережено: «${this.getCostumeDisplayName(costume)}» (${costume.votes} голосів)!`);
     }
 
-    this.showToastNotification(`✅ Зміни збережено: «${this.getCostumeDisplayName(costume)}» (${costume.votes} голосів)! Натисніть «💾 Експорт JSON».`);
+    this.newEditPhotoData = null;
   }
 
   async toggleVote(costumeId) {
