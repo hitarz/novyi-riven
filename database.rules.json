@@ -1,24 +1,24 @@
 {
   "rules": {
     "costumes_live": {
-      "": {
+      "$costumeId": {
         ".read": true,
-        ".write": "root.child('costumes_live').child().exists() && newData.exists() && ( === 'costume_1793798348570' ||  === 'costume_1793735651680' ||  === 'costume_1793735576484' ||  === 'costume_1793735570960' ||  === 'costume_1793735490029' ||  === 'costume_1793735398534' ||  === 'costume_1793735378243' ||  === 'costume_1793735369622' ||  === 'costume_1793735343519' ||  === 'costume_1793735307666' ||  === 'costume_1793735212151' ||  === 'costume_1793735193442' ||  === 'costume_1793735160306' ||  === 'costume_1793718047281' ||  === 'costume_1793703589019' ||  === 'costume_1793703514462' ||  === 'costume_1793703473213' ||  === 'costume_1793703420853' ||  === 'costume_1793703404321' ||  === 'costume_1793703348538' ||  === 'costume_1793703288837' ||  === 'costume_1793703203413' ||  === 'costume_1793703180018' ||  === 'costume_1793652388267' ||  === 'costume_1793650980031' ||  === 'costume_1793650738158' ||  === 'costume_1793650710069' ||  === 'costume_1793646696429' ||  === 'costume_1793646675767' ||  === 'costume_1793646546773' ||  === 'costume_1793646509043' ||  === 'costume_1793646481927' ||  === 'costume_1793646454313' ||  === 'costume_1793646431193' ||  === 'costume_1793646351387' ||  === 'costume_1793646259872' ||  === 'costume_1793645711089' ||  === 'costume_1793644757797' ||  === 'costume_1793643890850' ||  === 'costume_1793646664201')",
+        ".write": "root.child('costumes_live').child($costumeId).exists() && newData.exists() && ($costumeId === 'costume_1793798348570' || $costumeId === 'costume_1793735651680' || $costumeId === 'costume_1793735576484' || $costumeId === 'costume_1793735570960' || $costumeId === 'costume_1793735490029' || $costumeId === 'costume_1793735398534' || $costumeId === 'costume_1793735378243' || $costumeId === 'costume_1793735369622' || $costumeId === 'costume_1793735343519' || $costumeId === 'costume_1793735307666' || $costumeId === 'costume_1793735212151' || $costumeId === 'costume_1793735193442' || $costumeId === 'costume_1793735160306' || $costumeId === 'costume_1793718047281' || $costumeId === 'costume_1793703589019' || $costumeId === 'costume_1793703514462' || $costumeId === 'costume_1793703473213' || $costumeId === 'costume_1793703420853' || $costumeId === 'costume_1793703404321' || $costumeId === 'costume_1793703348538' || $costumeId === 'costume_1793703288837' || $costumeId === 'costume_1793703203413' || $costumeId === 'costume_1793703180018' || $costumeId === 'costume_1793652388267' || $costumeId === 'costume_1793650980031' || $costumeId === 'costume_1793650738158' || $costumeId === 'costume_1793650710069' || $costumeId === 'costume_1793646696429' || $costumeId === 'costume_1793646675767' || $costumeId === 'costume_1793646546773' || $costumeId === 'costume_1793646509043' || $costumeId === 'costume_1793646481927' || $costumeId === 'costume_1793646454313' || $costumeId === 'costume_1793646431193' || $costumeId === 'costume_1793646351387' || $costumeId === 'costume_1793646259872' || $costumeId === 'costume_1793645711089' || $costumeId === 'costume_1793644757797' || $costumeId === 'costume_1793643890850' || $costumeId === 'costume_1793646664201')",
         "votes": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || (newData.val() - data.val() <= 1 && data.val() - newData.val() <= 1))"
         },
         "voters": {
-          "": {
+          "$voterId": {
             ".validate": "newData.isBoolean()"
           }
         },
         "voters_ip": {
-          "": {
-            ".validate": "newData.isBoolean() && .matches(/^ip_[a-zA-Z0-9_]+$/)"
+          "$ipKey": {
+            ".validate": "newData.isBoolean() && $ipKey.matches(/^ip_[a-zA-Z0-9_]+$/)"
           }
         },
         "tags": {
-          "": {
+          "$tagName": {
             ".validate": "newData.isNumber() && newData.val() >= 0"
           }
         }
