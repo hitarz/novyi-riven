@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#060b08">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' blob: data:; connect-src 'self' https://novyi-riven-election-default-rtdb.europe-west1.firebasedatabase.app wss://novyi-riven-election-default-rtdb.europe-west1.firebasedatabase.app https://api.ipify.org;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' https://novyi-riven-election-default-rtdb.europe-west1.firebasedatabase.app wss://novyi-riven-election-default-rtdb.europe-west1.firebasedatabase.app https://api.ipify.org;">
   <!-- OWASP Clickjacking Defense: Frame-Busting -->
   <style id="anti-clickjack">body{display:none !important;}</style>
   <script>
@@ -302,7 +302,7 @@
     </div>
   </div>
 
-  <!-- Interactive Tag Picker Modal (Students choose from list) -->
+  <!-- Tag Picker Modal -->
   <div class="modal-overlay" id="tagPickerModal">
     <div class="modal-container" style="max-width: 480px;">
       <div class="modal-header">
@@ -411,12 +411,12 @@
     </div>
   </div>
 
-  <!-- Google Firebase Realtime Database SDK (Compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <!-- Google Firebase Realtime Database SDK (Compat) with Sub-Resource Integrity (SRI) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" integrity="sha384-ajMUFBUFMCyjh8uxJg6bkGcKe9RTolyjwbxB3yES0QQMenP3Oztj/W9vA2SJPcIh" crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" integrity="sha384-f6/UpzjTjIXASlp20cArQsaRh1EvHVJd5kegy/gYR9W2D0a32TnEqUEiW4Zm/5O0" crossorigin="anonymous"></script>
   <script src="firebase-config.js"></script>
-  <script src="admin.js?v=3.1"></script>
-  <script src="events.js?v=3.1"></script>
+  <script src="admin.js?v=3.2"></script>
+  <script src="events.js?v=3.2"></script>
   <script src="mascot.js"></script>
 </body>
 </html>
