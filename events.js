@@ -562,7 +562,9 @@ class HalloweenEventsApp {
 
     const toast = document.createElement("div");
     toast.className = "vote-toast";
-    toast.innerHTML = `<span>${message}</span>`;
+    const span = document.createElement("span");
+    span.textContent = message;
+    toast.appendChild(span);
     container.appendChild(toast);
 
     setTimeout(() => {
@@ -1139,9 +1141,11 @@ class HalloweenEventsApp {
     const sorted = [...this.costumes].sort((a, b) => (b.num || 0) - (a.num || 0));
     this.editCostumeSelect.innerHTML = sorted.map(c => {
       const isSelected = c.id === selectedId;
-      const dName = this.getCostumeDisplayName(c);
-      const gradePart = c.grade ? `(${c.grade})` : '';
-      return `<option value="${c.id}" ${isSelected ? 'selected' : ''}>🎃 №${c.num || ''} — ${dName} ${gradePart}</option>`;
+      const safeId = escapeHtml(c.id);
+      const dName = escapeHtml(this.getCostumeDisplayName(c));
+      const gradePart = c.grade ? escapeHtml(`(${c.grade})`) : '';
+      const numPart = escapeHtml(String(c.num || ''));
+      return `<option value="${safeId}" ${isSelected ? 'selected' : ''}>🎃 №${numPart} — ${dName} ${gradePart}</option>`;
     }).join("");
   }
 
@@ -1421,22 +1425,27 @@ class HalloweenEventsApp {
 
     // 2-ге місце (якщо є хоча б 2 костюми)
     if (top2) {
+      const top2Id = escapeHtml(top2.id);
+      const top2Name = escapeHtml(this.getCostumeDisplayName(top2));
+      const top2Image = escapeHtml(top2.image);
+      const top2Grade = top2.grade ? escapeHtml(top2.grade) : '';
+      const top2Votes = Number(top2.votes) || 0;
       podiumHtml += `
         <div class="podium-column second">
-          <div class="podium-avatar-wrap" onclick="window.halloweenApp.openCostumeById('${top2.id}')" style="cursor: zoom-in;" title="Переглянути фото на весь екран">
+          <div class="podium-avatar-wrap" onclick="window.halloweenApp.openCostumeById('${top2Id}')" style="cursor: zoom-in;" title="Переглянути фото на весь екран">
             <span class="podium-crown-badge">🥈</span>
-            <img src="${top2.image}" alt="${this.getCostumeDisplayName(top2)}" class="podium-avatar">
+            <img src="${top2Image}" alt="${top2Name}" class="podium-avatar">
           </div>
           <div class="podium-info">
             <div class="podium-costume-name">
-              ${this.getCostumeDisplayName(top2)}
-              <button type="button" class="btn-podium-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${top2.id}')" title="Перейменувати костюм">✏️</button>
+              ${top2Name}
+              <button type="button" class="btn-podium-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${top2Id}')" title="Перейменувати костюм">✏️</button>
             </div>
-            <div class="podium-user-name">${top2.grade ? top2.grade : ''}</div>
+            <div class="podium-user-name">${top2Grade}</div>
           </div>
           <div class="podium-step">
             <div class="podium-rank-num">2</div>
-            <div class="podium-votes-count">${top2.votes} голосів</div>
+            <div class="podium-votes-count">${top2Votes} голосів</div>
           </div>
         </div>
       `;
@@ -1444,22 +1453,27 @@ class HalloweenEventsApp {
 
     // 1-ше місце (Центр)
     if (top1) {
+      const top1Id = escapeHtml(top1.id);
+      const top1Name = escapeHtml(this.getCostumeDisplayName(top1));
+      const top1Image = escapeHtml(top1.image);
+      const top1Grade = top1.grade ? escapeHtml(top1.grade) : '';
+      const top1Votes = Number(top1.votes) || 0;
       podiumHtml += `
         <div class="podium-column first">
-          <div class="podium-avatar-wrap" onclick="window.halloweenApp.openCostumeById('${top1.id}')" style="cursor: zoom-in;" title="Переглянути фото на весь екран">
+          <div class="podium-avatar-wrap" onclick="window.halloweenApp.openCostumeById('${top1Id}')" style="cursor: zoom-in;" title="Переглянути фото на весь екран">
             <span class="podium-crown-badge">👑</span>
-            <img src="${top1.image}" alt="${this.getCostumeDisplayName(top1)}" class="podium-avatar">
+            <img src="${top1Image}" alt="${top1Name}" class="podium-avatar">
           </div>
           <div class="podium-info">
             <div class="podium-costume-name" style="color: #ffd700; font-size: 17px;">
-              ${this.getCostumeDisplayName(top1)}
-              <button type="button" class="btn-podium-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${top1.id}')" title="Перейменувати костюм">✏️</button>
+              ${top1Name}
+              <button type="button" class="btn-podium-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${top1Id}')" title="Перейменувати костюм">✏️</button>
             </div>
-            <div class="podium-user-name">${top1.grade ? top1.grade : ''}</div>
+            <div class="podium-user-name">${top1Grade}</div>
           </div>
           <div class="podium-step">
             <div class="podium-rank-num" style="color: #ffd700;">1</div>
-            <div class="podium-votes-count" style="font-size: 14px; font-weight: 800;">🔥 ${top1.votes} голосів</div>
+            <div class="podium-votes-count" style="font-size: 14px; font-weight: 800;">🔥 ${top1Votes} голосів</div>
           </div>
         </div>
       `;
@@ -1467,22 +1481,27 @@ class HalloweenEventsApp {
 
     // 3-тє місце (якщо є 3+ костюмів)
     if (top3) {
+      const top3Id = escapeHtml(top3.id);
+      const top3Name = escapeHtml(this.getCostumeDisplayName(top3));
+      const top3Image = escapeHtml(top3.image);
+      const top3Grade = top3.grade ? escapeHtml(top3.grade) : '';
+      const top3Votes = Number(top3.votes) || 0;
       podiumHtml += `
         <div class="podium-column third">
-          <div class="podium-avatar-wrap" onclick="window.halloweenApp.openCostumeById('${top3.id}')" style="cursor: zoom-in;" title="Переглянути фото на весь екран">
+          <div class="podium-avatar-wrap" onclick="window.halloweenApp.openCostumeById('${top3Id}')" style="cursor: zoom-in;" title="Переглянути фото на весь екран">
             <span class="podium-crown-badge">🥉</span>
-            <img src="${top3.image}" alt="${this.getCostumeDisplayName(top3)}" class="podium-avatar">
+            <img src="${top3Image}" alt="${top3Name}" class="podium-avatar">
           </div>
           <div class="podium-info">
             <div class="podium-costume-name">
-              ${this.getCostumeDisplayName(top3)}
-              <button type="button" class="btn-podium-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${top3.id}')" title="Перейменувати костюм">✏️</button>
+              ${top3Name}
+              <button type="button" class="btn-podium-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${top3Id}')" title="Перейменувати костюм">✏️</button>
             </div>
-            <div class="podium-user-name">${top3.grade ? top3.grade : ''}</div>
+            <div class="podium-user-name">${top3Grade}</div>
           </div>
           <div class="podium-step">
             <div class="podium-rank-num">3</div>
-            <div class="podium-votes-count">${top3.votes} голосів</div>
+            <div class="podium-votes-count">${top3Votes} голосів</div>
           </div>
         </div>
       `;
@@ -1496,24 +1515,31 @@ class HalloweenEventsApp {
       if (rest.length === 0) {
         this.leaderboardList.innerHTML = `<p style="text-align: center; color: var(--text-muted); font-size: 13px;">Всі наявні образи зараз на п'єдесталі!</p>`;
       } else {
-        this.leaderboardList.innerHTML = rest.map((item, index) => `
+        this.leaderboardList.innerHTML = rest.map((item, index) => {
+          const safeId = escapeHtml(item.id);
+          const safeName = escapeHtml(this.getCostumeDisplayName(item));
+          const safeGrade = item.grade ? escapeHtml(item.grade) : '';
+          const safeImage = escapeHtml(item.image);
+          const safeVotes = Number(item.votes) || 0;
+          return `
           <div class="lb-row">
             <div class="lb-left">
               <span class="lb-rank">#${index + 4}</span>
-              <img src="${item.image}" alt="${this.getCostumeDisplayName(item)}" class="lb-thumb" onclick="window.halloweenApp.openCostumeById('${item.id}')" style="cursor: zoom-in;" title="Переглянути фото на весь екран">
+              <img src="${safeImage}" alt="${safeName}" class="lb-thumb" onclick="window.halloweenApp.openCostumeById('${safeId}')" style="cursor: zoom-in;" title="Переглянути фото на весь екран">
               <div class="lb-details">
                 <span class="lb-costume">
-                  ${this.getCostumeDisplayName(item)}
-                  <button type="button" class="btn-lb-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${item.id}')" title="Перейменувати костюм">✏️</button>
+                  ${safeName}
+                  <button type="button" class="btn-lb-edit admin-only" onclick="window.halloweenApp.openEditCostumeModal('${safeId}')" title="Перейменувати костюм">✏️</button>
                 </span>
-                <span class="lb-author">${item.grade ? item.grade : ''}</span>
+                <span class="lb-author">${safeGrade}</span>
               </div>
             </div>
             <div class="lb-votes-badge">
-              <span>❤️ ${item.votes}</span>
+              <span>❤️ ${safeVotes}</span>
             </div>
           </div>
-        `).join("");
+        `;
+        }).join("");
       }
     }
   }
@@ -1676,7 +1702,7 @@ class HalloweenEventsApp {
     }
 
     if (this.tagPickerDesc) {
-      const name = this.getCostumeDisplayName(costume);
+      const name = escapeHtml(this.getCostumeDisplayName(costume));
       this.tagPickerDesc.innerHTML = isAfterVote
         ? `Оберіть теги для <b>«${name}»</b> із переліку:`
         : `Оберіть теги для <b>«${name}»</b> із переліку:`;

@@ -257,7 +257,9 @@
       }
       const toast = document.createElement("div");
       toast.className = "vote-toast";
-      toast.innerHTML = `<span>${msg}</span>`;
+      const span = document.createElement("span");
+      span.textContent = msg;
+      toast.appendChild(span);
       container.appendChild(toast);
       setTimeout(() => {
         toast.classList.add("fade-out");

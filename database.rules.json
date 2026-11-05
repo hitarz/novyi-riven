@@ -1,5 +1,7 @@
 {
   "rules": {
+    ".read": false,
+    ".write": false,
     "costumes_live": {
       ".read": true,
       ".write": false
