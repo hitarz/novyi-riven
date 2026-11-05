@@ -49,9 +49,9 @@ function generateCostumeSvg(type, bgGrad1, bgGrad2, accentColor) {
 // За замовчуванням список пустий — костюми завантажуються користувачем
 const DEFAULT_COSTUMES = [];
 
-const STORAGE_KEY_COSTUMES = "novyi_riven_halloween_costumes_v2";
-const STORAGE_KEY_VOTES = "novyi_riven_user_costume_votes_v2";
-const STORAGE_KEY_USER_TAGS = "novyi_riven_costume_user_tags_v1";
+const STORAGE_KEY_COSTUMES = "novyi_riven_halloween_costumes_v3";
+const STORAGE_KEY_VOTES = "novyi_riven_user_costume_votes_v3";
+const STORAGE_KEY_USER_TAGS = "novyi_riven_costume_user_tags_v2";
 
 /**
  * БІЛИЙ СПИСОК офіційних костюмів конкурсу (40 учасників).
@@ -320,52 +320,10 @@ class HalloweenEventsApp {
       if (res.ok) {
         const remoteCostumes = await res.json();
         if (Array.isArray(remoteCostumes) && remoteCostumes.length > 0) {
-          let changed = false;
-          if (!this.costumes || this.costumes.length === 0) {
-            this.costumes = remoteCostumes;
-            changed = true;
-          } else {
-            remoteCostumes.forEach(rc => {
-              const local = this.costumes.find(c => c.id === rc.id);
-              if (!local) {
-                this.costumes.push(rc);
-                changed = true;
-              } else {
-                if (rc.title && local.title !== rc.title) {
-                  local.title = rc.title;
-                  changed = true;
-                }
-                if (rc.grade !== undefined && local.grade !== rc.grade) {
-                  local.grade = rc.grade;
-                  changed = true;
-                }
-                if (rc.desc !== undefined && local.desc !== rc.desc) {
-                  local.desc = rc.desc;
-                  changed = true;
-                }
-                if (rc.num !== undefined && local.num !== rc.num) {
-                  local.num = rc.num;
-                  changed = true;
-                }
-                if (rc.votes !== undefined && (local.votes === undefined || rc.votes > (local.votes || 0))) {
-                  local.votes = rc.votes;
-                  changed = true;
-                }
-                if (rc.tags && typeof rc.tags === "object") {
-                  local.tags = Object.assign({}, rc.tags, local.tags || {});
-                  changed = true;
-                }
-                if (rc.image && (!local.image || local.image.startsWith("data:image/svg") || local.image !== rc.image)) {
-                  local.image = rc.image;
-                  changed = true;
-                }
-              }
-            });
-          }
-          if (changed) {
-            this.saveCostumes(this.costumes);
-            this.render();
-          }
+          // Офіційний costumes.json є фінальним джерелом істини після закриття голосування
+          this.costumes = remoteCostumes;
+          this.saveCostumes(this.costumes);
+          this.render();
         }
       }
     } catch (e) {}
@@ -374,7 +332,9 @@ class HalloweenEventsApp {
   cleanLegacyStorage() {
     try {
       localStorage.removeItem("novyi_riven_halloween_costumes_v1");
+      localStorage.removeItem("novyi_riven_halloween_costumes_v2");
       localStorage.removeItem("novyi_riven_user_costume_votes_v1");
+      localStorage.removeItem("novyi_riven_user_costume_votes_v2");
     } catch (e) {}
   }
 
@@ -458,7 +418,12 @@ class HalloweenEventsApp {
         this.updateLiveIndicator(isOnline);
       });
 
-      // Підписка на живі дані всіх костюмів у реальному часі
+      // Підписка на живі дані всіх костюмів у реальному часі (тільки під час активного голосування)
+      if (IS_VOTING_CLOSED) {
+        // Голосування офіційно завершено: фінальні результати зафіксовані в costumes.json
+        return;
+      }
+
       this.db.ref("costumes_live").on("value", (snapshot) => {
         const liveData = snapshot.val();
         if (!liveData) return;
