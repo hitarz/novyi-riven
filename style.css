@@ -2034,6 +2034,28 @@ body::before {
   background: linear-gradient(135deg, #dc2626, #e11d48);
 }
 
+.btn-vote.closed {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-muted);
+  cursor: default;
+  opacity: 0.85;
+}
+
+.btn-vote.closed:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-vote.closed.voted {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  box-shadow: none;
+}
+
 .btn-vote svg {
   transition: transform 0.2s ease;
 }

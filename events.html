@@ -94,34 +94,35 @@
       <div class="spotlight-glow"></div>
       <div class="spotlight-header">
         <span class="spotlight-tag">🎃 Головний івент осені</span>
-        <span class="spotlight-status" id="liveSyncStatus">Live-голосування онлайн</span>
+        <span class="spotlight-status" id="liveSyncStatus" style="color: #fbbf24;">🏆 Голосування офіційно завершено</span>
       </div>
       <h1 class="spotlight-title">Битва Костюмів: Хеловін 2026</h1>
       <p class="spotlight-desc">
-        Сьогодні наш ліцей перетворився на арену містики, креативу та кібер-магії! Оцінюйте образи однокласників та друзів, виводьте фаворитів на вершину п'єдесталу або додайте власний костюм до конкурсу.
+        Голосування за найкращі костюми ліцею завершено! Результати зафіксовано, переможців визначено. Дякуємо всім ліцеїстам за неймовірну активність, креатив та святкову атмосферу!
       </p>
 
       <!-- Prizes & Contest Conditions Banner -->
-      <div class="event-prizes-highlight">
-        <div class="prize-highlight-badge">
-          <span>🎁</span>
-          <span>Умови конкурсу</span>
-        </div>
-        <h3 class="prize-highlight-title" style="margin-bottom: 6px;">
+      <div class="event-prizes-highlight" style="border-color: rgba(251, 191, 36, 0.4); background: rgba(251, 191, 36, 0.05);">
+        <div class="prize-highlight-badge" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24;">
           <span>🏆</span>
-          <span>Перші три місця отримають призи!</span>
+          <span>Офіційні підсумки конкурсу</span>
+        </div>
+        <h3 class="prize-highlight-title" style="margin-bottom: 6px; color: #fbbf24;">
+          <span>🎉</span>
+          <span>Вітаємо призерів Битви Костюмів 2026!</span>
         </h3>
         <p class="prize-highlight-text" style="margin-bottom: 0;">
-          Учасники, які посядуть <b>1-ше, 2-ге та 3-тє місця</b> за підсумками голосування, отримають призи!
+          Учасники на <b>1-му, 2-му та 3-му місцях</b> за підсумками фінального голосування отримують призи від партії «Новий Рівень»!
         </p>
       </div>
 
       <div class="spotlight-actions" style="margin-top: 16px;">
-        <a href="#votingSection" class="btn-spotlight-primary">
+        <a href="#podiumContainer" class="btn-spotlight-primary" style="background: linear-gradient(135deg, #fbbf24 0%, #ea580c 100%);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            <circle cx="12" cy="8" r="7"></circle>
+            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
           </svg>
-          <span>Голосувати за образи</span>
+          <span>Дивитися переможців 🏆</span>
         </a>
       </div>
     </div>
@@ -129,10 +130,10 @@
     <!-- Leaderboard / Podium Section -->
     <section class="leaderboard-section">
       <div class="section-heading-wrap">
-        <span class="section-kicker">🏆 Рейтинг у реальному часі</span>
-        <h2 class="section-main-title">ТОП за голосами</h2>
+        <span class="section-kicker">🏆 Офіційні результати</span>
+        <h2 class="section-main-title">ТОП за підсумками голосування</h2>
         <p class="section-description">
-          Трійка лідерів оновлюється миттєво після кожного вашого кліку. Всього віддано голосів: <b id="totalVotesStat" style="color: var(--neon-green);">...</b>
+          Фінальний рейтинг учасників зафіксовано. Всього віддано голосів: <b id="totalVotesStat" style="color: var(--neon-green);">...</b>
         </p>
       </div>
 

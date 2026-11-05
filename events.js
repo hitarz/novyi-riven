@@ -107,6 +107,12 @@ const MAX_VOTES_DELTA = 1;
 /** Мінімальний інтервал між голосами одного пристрою (мс) */
 const VOTE_COOLDOWN_MS = 2000;
 
+/** 
+ * СТАТУС КОНКУРСУ: ГОЛОСУВАННЯ ОФІЦІЙНО ЗАВЕРШЕНО
+ * Фіксує результати, блокує кнопки голосування та оцінювання тегами.
+ */
+const IS_VOTING_CLOSED = true;
+
 const PRESET_TAGS = [
   "👻 Страшний",
   "🎨 Креативний",
@@ -530,6 +536,11 @@ class HalloweenEventsApp {
   updateLiveIndicator(isOnline) {
     const badge = document.getElementById("liveSyncStatus");
     if (!badge) return;
+    if (IS_VOTING_CLOSED) {
+      badge.textContent = "🏆 Голосування завершено • Результати зафіксовано";
+      badge.style.color = "var(--neon-gold, #fbbf24)";
+      return;
+    }
     if (isOnline) {
       badge.textContent = "Live-голосування онлайн ⚡";
       badge.style.color = "var(--neon-green)";
@@ -1249,6 +1260,11 @@ class HalloweenEventsApp {
   }
 
   async toggleVote(costumeId) {
+    if (IS_VOTING_CLOSED) {
+      this.showToastNotification("🏆 Голосування офіційно завершено! Результати зафіксовано.");
+      return;
+    }
+
     // ── ЗАХИСТ 1: тільки вайтлістовані костюми можуть отримувати голоси
     if (!ALLOWED_COSTUME_IDS.has(costumeId)) {
       console.warn("[Security] Спроба проголосувати за несанкціонований костюм:", costumeId);
@@ -1667,11 +1683,13 @@ class HalloweenEventsApp {
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                   </svg>
                 </button>
-                <button class="btn-vote ${isVoted ? 'voted' : ''}" onclick="window.halloweenApp.toggleVote('${item.id}')">
+                <button class="btn-vote ${IS_VOTING_CLOSED ? 'closed' : ''} ${isVoted ? 'voted' : ''}" 
+                  onclick="window.halloweenApp.toggleVote('${item.id}')" 
+                  ${IS_VOTING_CLOSED ? 'title="Голосування офіційно завершено"' : ''}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="${isVoted ? '#fff' : 'none'}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                   </svg>
-                  <span>${isVoted ? 'Ви проголосували' : 'Голосувати'}</span>
+                  <span>${IS_VOTING_CLOSED ? (isVoted ? 'Ваш голос враховано' : 'Голосування закрито') : (isVoted ? 'Ви проголосували' : 'Голосувати')}</span>
                 </button>
               </div>
             </div>
@@ -1730,6 +1748,10 @@ class HalloweenEventsApp {
   }
 
   toggleTag(costumeId, tag) {
+    if (IS_VOTING_CLOSED) {
+      this.showToastNotification("🏆 Оцінювання завершено! Результати зафіксовано.");
+      return;
+    }
     const costume = this.costumes.find(c => c.id === costumeId);
     if (!costume) return;
 
