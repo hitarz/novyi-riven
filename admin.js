@@ -4,9 +4,12 @@
  * Для звичайних відвідувачів кнопки завантаження та видалення повністю приховані.
  */
 (function() {
-  // SHA-256 хеш пароля адміна (2026) — захищає від перегляду пароля в DevTools
-  const ADMIN_PIN_HASH = "158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab";
-  const STORAGE_KEY_ADMIN = "novyi_riven_admin_session_v1";
+  // SHA-256 хеш пін-коду адміна — захищає від перегляду пароля в DevTools
+  // УВАГА: не змінюйте цей рядок без оновлення пін-коду
+  const ADMIN_PIN_HASH = "d103b1a477ee8cc92037b21f5ebff71a23e08bd561b7d9e63479f0bb5c93d627";
+  // Секрет сесії — використовується для перевірки що сесія видана цим сайтом
+  const SESSION_SECRET = "d9c2948df34e07f4657e6fe5595dd6dc233f0dc484166e2b6bc8770333957584";
+  const STORAGE_KEY_ADMIN = "novyi_riven_admin_session_v2";
 
   async function sha256(str) {
     if (!str) return "";
@@ -21,15 +24,73 @@
 
   class AdminAuthManager {
     constructor() {
-      this.isAdmin = this.checkSavedSession();
-      this.checkUrlParam();
+      this.isAdmin = false;
+      this._sessionSig = null;
       this.initEvents();
-      this.applyState();
+      // Відновлюємо сесію асинхронно — з верифікацією підписаного токена
+      this.restoreSession().then(isValid => {
+        if (isValid) {
+          this.isAdmin = true;
+          this.applyState();
+        }
+        // Перевірка параметра URL після відновлення сесії
+        this.checkUrlParam();
+      });
     }
 
     checkSavedSession() {
       try {
-        return localStorage.getItem(STORAGE_KEY_ADMIN) === "true";
+        const stored = localStorage.getItem(STORAGE_KEY_ADMIN);
+        if (!stored) return false;
+        // Перевіряємо що токен відповідає формату, підписаному секретом сесії
+        const [payload, sig] = stored.split(".");
+        if (!payload || !sig) return false;
+        // Верифікація: sha256(payload + SESSION_SECRET) має збігатися з sig
+        // Оскільки crypto.subtle є асинхронним — зберігаємо хеш при вході і порівнюємо
+        return payload === btoa("admin_session") && sig === this._sessionSig;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async _buildSessionToken() {
+      try {
+        const payload = btoa("admin_session");
+        const rawSig = await sha256(payload + SESSION_SECRET);
+        const sig = rawSig.slice(0, 32);
+        this._sessionSig = sig;
+        return payload + "." + sig;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async saveSession() {
+      const token = await this._buildSessionToken();
+      if (token) {
+        try { localStorage.setItem(STORAGE_KEY_ADMIN, token); } catch (e) {}
+      }
+    }
+
+    clearSession() {
+      try { localStorage.removeItem(STORAGE_KEY_ADMIN); } catch (e) {}
+      // Також очищаємо старий ключ від v1 на випадок якщо залишився
+      try { localStorage.removeItem("novyi_riven_admin_session_v1"); } catch (e) {}
+      this._sessionSig = null;
+    }
+
+    async restoreSession() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_ADMIN);
+        if (!stored) return false;
+        const [payload, sig] = stored.split(".");
+        if (!payload || !sig) return false;
+        if (payload !== btoa("admin_session")) return false;
+        const rawSig = await sha256(payload + SESSION_SECRET);
+        const expectedSig = rawSig.slice(0, 32);
+        if (sig !== expectedSig) return false;
+        this._sessionSig = expectedSig;
+        return true;
       } catch (e) {
         return false;
       }
@@ -43,11 +104,11 @@
           const h = await sha256(adminParam);
           if (h === ADMIN_PIN_HASH) {
             this.isAdmin = true;
-            localStorage.setItem(STORAGE_KEY_ADMIN, "true");
+            await this.saveSession();
             this.applyState();
             this.showAdminToast("👑 Режим адміністратора активовано!");
           }
-          // Прибираємо секретний параметр з адресного рядка, щоб не світити його
+          // Прибираємо секретний параметр з адресного рядка
           const cleanUrl = window.location.pathname + window.location.hash;
           window.history.replaceState({}, document.title, cleanUrl);
         }
@@ -58,7 +119,7 @@
       const h = await sha256(pin);
       if (h === ADMIN_PIN_HASH) {
         this.isAdmin = true;
-        localStorage.setItem(STORAGE_KEY_ADMIN, "true");
+        await this.saveSession();
         this.applyState();
         this.showAdminToast("👑 Режим адміністратора активовано!");
         return true;
@@ -68,7 +129,7 @@
 
     logout() {
       this.isAdmin = false;
-      localStorage.removeItem(STORAGE_KEY_ADMIN);
+      this.clearSession();
       this.applyState();
       this.showAdminToast("ℹ️ Ви вийшли з режиму адміністратора");
     }

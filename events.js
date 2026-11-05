@@ -53,6 +53,60 @@ const STORAGE_KEY_COSTUMES = "novyi_riven_halloween_costumes_v2";
 const STORAGE_KEY_VOTES = "novyi_riven_user_costume_votes_v2";
 const STORAGE_KEY_USER_TAGS = "novyi_riven_costume_user_tags_v1";
 
+/**
+ * БІЛИЙ СПИСОК офіційних костюмів конкурсу (40 учасників).
+ * Будь-який костюм із Firebase, ID якого ВІДСУТНІЙ у цьому списку,
+ * буде автоматично ВІДХИЛЕНО та ВИДАЛЕНО з бази даних.
+ * Це головний захист від зловмисного додавання нових кандидатів через прямі HTTP-запити.
+ */
+const ALLOWED_COSTUME_IDS = new Set([
+  "costume_1793798348570",
+  "costume_1793735651680",
+  "costume_1793735576484",
+  "costume_1793735570960",
+  "costume_1793735490029",
+  "costume_1793735398534",
+  "costume_1793735378243",
+  "costume_1793735369622",
+  "costume_1793735343519",
+  "costume_1793735307666",
+  "costume_1793735212151",
+  "costume_1793735193442",
+  "costume_1793735160306",
+  "costume_1793718047281",
+  "costume_1793703589019",
+  "costume_1793703514462",
+  "costume_1793703473213",
+  "costume_1793703420853",
+  "costume_1793703404321",
+  "costume_1793703348538",
+  "costume_1793703288837",
+  "costume_1793703203413",
+  "costume_1793703180018",
+  "costume_1793652388267",
+  "costume_1793650980031",
+  "costume_1793650738158",
+  "costume_1793650710069",
+  "costume_1793646696429",
+  "costume_1793646675767",
+  "costume_1793646546773",
+  "costume_1793646509043",
+  "costume_1793646481927",
+  "costume_1793646454313",
+  "costume_1793646431193",
+  "costume_1793646351387",
+  "costume_1793646259872",
+  "costume_1793645711089",
+  "costume_1793644757797",
+  "costume_1793643890850",
+  "costume_1793646664201"
+]);
+
+/** Максимально допустимий приріст голосів за одну транзакцію */
+const MAX_VOTES_DELTA = 1;
+/** Мінімальний інтервал між голосами одного пристрою (мс) */
+const VOTE_COOLDOWN_MS = 2000;
+
 const PRESET_TAGS = [
   "👻 Страшний",
   "🎨 Креативний",
@@ -231,8 +285,10 @@ class DeviceFingerprint {
 class HalloweenEventsApp {
   constructor() {
     this.visitorId = null;
+    this.clientIpKey = null;
     this.db = null;
     this.isFirebaseLive = false;
+    this._lastVoteTime = {}; // Rate limiter: costumeId -> timestamp
     this.cleanLegacyStorage();
     this.costumes = this.loadCostumes();
     this.userVotes = this.loadUserVotes();
@@ -402,59 +458,47 @@ class HalloweenEventsApp {
         if (!liveData) return;
 
         let changed = false;
-        const liveIds = new Set(Object.keys(liveData));
 
-        // 1. Оновлюємо або створюємо костюми з хмари на льоту
+        // ═══════════════════════════════════════════════════════════════════
+        // ЗАХИСТ: автоматично видаляємо з Firebase будь-який ID, якого НЕМАЄ
+        // у ALLOWED_COSTUME_IDS. Навіть якщо зловмисник надіслав прямий
+        // PUT/PATCH-запит через curl або DevTools — сайт сам почистить базу.
+        // ═══════════════════════════════════════════════════════════════════
+        for (const id of Object.keys(liveData)) {
+          if (!ALLOWED_COSTUME_IDS.has(id)) {
+            console.warn("[Security] Виявлено несанкціонований костюм у Firebase:", id, "— видаляємо!");
+            this.db.ref("costumes_live/" + id).remove().catch(() => {});
+          }
+        }
+
+        // 1. Оновлюємо тільки дозволені (вайтлістовані) костюми
         for (const [id, liveItem] of Object.entries(liveData)) {
-          let local = this.costumes.find(c => c.id === id);
+          // Пропускаємо несанкціоновані ID — вони вже видаляються вище
+          if (!ALLOWED_COSTUME_IDS.has(id)) continue;
+
+          const local = this.costumes.find(c => c.id === id);
           if (!local) {
-            // Новий костюм, доданий онлайн без необхідності робити git коміт!
-            local = {
-              id: id,
-              num: liveItem.num || 0,
-              title: liveItem.title || `Костюм №${liveItem.num || ''}`,
-              grade: liveItem.grade || "",
-              desc: liveItem.desc || "",
-              votes: typeof liveItem.votes === "number" ? liveItem.votes : 0,
-              tags: liveItem.tags || {},
-              image: liveItem.image || "",
-              date: liveItem.date || new Date().toISOString().split("T")[0],
-              voters: liveItem.voters ? Object.keys(liveItem.voters) : []
-            };
-            this.costumes.unshift(local);
+            // Костюм є у вайтлісті, але відсутній локально (наприклад, перша завантаження)
+            const refCostume = { id, votes: 0, tags: {}, voters: [] };
+            if (typeof liveItem.votes === "number") refCostume.votes = liveItem.votes;
+            if (liveItem.tags && typeof liveItem.tags === "object") refCostume.tags = liveItem.tags;
+            // Метадані (назва, фото) беремо з локального джерела правди (checkRemoteData)
+            this.costumes.push(refCostume);
             changed = true;
           } else {
-            // Оновлюємо існуючий костюм
+            // Оновлюємо ТІЛЬКИ голоси та теги — захищаємо назву, фото, клас від підміни
             if (typeof liveItem.votes === "number" && local.votes !== liveItem.votes) {
               local.votes = liveItem.votes;
               changed = true;
             }
             if (liveItem.tags && typeof liveItem.tags === "object") {
-              local.tags = liveItem.tags;
-              changed = true;
+              const tagsStr = JSON.stringify(liveItem.tags);
+              if (tagsStr !== JSON.stringify(local.tags)) {
+                local.tags = liveItem.tags;
+                changed = true;
+              }
             }
-            if (liveItem.title && local.title !== liveItem.title) {
-              local.title = liveItem.title;
-              changed = true;
-            }
-            if (liveItem.grade !== undefined && local.grade !== liveItem.grade) {
-              local.grade = liveItem.grade;
-              changed = true;
-            }
-            if (liveItem.desc !== undefined && local.desc !== liveItem.desc) {
-              local.desc = liveItem.desc;
-              changed = true;
-            }
-            if (liveItem.num !== undefined && local.num !== liveItem.num) {
-              local.num = liveItem.num;
-              changed = true;
-            }
-            // Оновлення фотографії, якщо вона була змінена в Firebase
-            if (liveItem.image && local.image !== liveItem.image) {
-              local.image = liveItem.image;
-              changed = true;
-            }
-            // Синхронізуємо статус вибору для поточного пристрою (тільки додаємо підтверджені голоси)
+            // Синхронізуємо статус вибору для поточного пристрою (тільки ДОДАЄМО підтверджені голоси)
             if (liveItem.voters && typeof liveItem.voters === "object") {
               const hasInDb = (this.visitorId && liveItem.voters[this.visitorId]) ||
                               (this.clientIpKey && liveItem.voters_ip && liveItem.voters_ip[this.clientIpKey]);
@@ -466,14 +510,9 @@ class HalloweenEventsApp {
           }
         }
 
-        // 2. Видаляємо костюми, які були видалені в хмарі
-        if (liveIds.size > 0) {
-          const beforeCount = this.costumes.length;
-          this.costumes = this.costumes.filter(c => liveIds.has(c.id));
-          if (this.costumes.length !== beforeCount) {
-            changed = true;
-          }
-        }
+        // 2. НЕ видаляємо локальні костюми, яких немає у Firebase —
+        //    вони можуть завантажитись з costumes.json пізніше.
+        //    Але якщо костюма немає у вайтлісті — він просто не рендериться.
 
         if (changed) {
           this.saveCostumes(this.costumes);
@@ -932,8 +971,11 @@ class HalloweenEventsApp {
       });
     }
 
-    // Вставка з буфера обміну через Ctrl + V
+    // Вставка з буфера обміну через Ctrl + V — тільки для адмінів
     window.addEventListener("paste", (e) => {
+      // Перевірка: чи активований адмін-режим
+      if (!window.adminAuth || !window.adminAuth.isAdmin) return;
+
       const clipboardData = e.clipboardData || window.clipboardData;
       if (!clipboardData) return;
 
@@ -984,6 +1026,12 @@ class HalloweenEventsApp {
   }
 
   handleCreateCostume() {
+    // ── ЗАХИСТ: додавання нових кандидатів — лише для адміністратора
+    if (!window.adminAuth || !window.adminAuth.isAdmin) {
+      console.warn("[Security] Спроба створити костюм без прав адміністратора — відхилено.");
+      return;
+    }
+
     const titleInput = document.getElementById("costumeTitle");
     const title = titleInput ? titleInput.value.trim() : "";
     const gradeInput = document.getElementById("costumeGrade");
@@ -1053,12 +1101,18 @@ class HalloweenEventsApp {
   }
 
   deleteCostume(costumeId) {
+    // ── ЗАХИСТ: видалення кандидатів — лише для адміністратора
+    if (!window.adminAuth || !window.adminAuth.isAdmin) {
+      console.warn("[Security] Спроба видалити костюм без прав адміністратора — відхилено.");
+      return;
+    }
     const item = this.costumes.find(c => c.id === costumeId);
     if (!item) return;
     const name = this.getCostumeDisplayName(item);
     if (!confirm(`Ви впевнені, що хочете видалити «${name}» з конкурсу?`)) {
       return;
     }
+
     this.costumes = this.costumes.filter(c => c.id !== costumeId);
     this.userVotes.delete(costumeId);
     delete this.userTagVotes[costumeId];
@@ -1195,6 +1249,20 @@ class HalloweenEventsApp {
   }
 
   async toggleVote(costumeId) {
+    // ── ЗАХИСТ 1: тільки вайтлістовані костюми можуть отримувати голоси
+    if (!ALLOWED_COSTUME_IDS.has(costumeId)) {
+      console.warn("[Security] Спроба проголосувати за несанкціонований костюм:", costumeId);
+      return;
+    }
+
+    // ── ЗАХИСТ 2: rate limiter — не частіше ніж раз на VOTE_COOLDOWN_MS
+    const now = Date.now();
+    if (this._lastVoteTime[costumeId] && (now - this._lastVoteTime[costumeId]) < VOTE_COOLDOWN_MS) {
+      this.showToastNotification("⏳ Зачекайте трохи перед повторним голосуванням.");
+      return;
+    }
+    this._lastVoteTime[costumeId] = now;
+
     if (!this.visitorId) {
       this.visitorId = await DeviceFingerprint.getFingerprint();
     }
