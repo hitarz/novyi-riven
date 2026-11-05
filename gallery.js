@@ -5,6 +5,17 @@
  * Додавання та видалення фото доступне виключно адміністратору партії (admin.js).
  */
 
+// Екранування HTML від XSS
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 // Початкові альбоми ліцею
 const DEFAULT_ALBUMS = [
   {
@@ -308,9 +319,10 @@ class LyceumGalleryApp {
 
     this.multiPreviewGrid.innerHTML = this.selectedFiles.map((file, idx) => {
       const tempUrl = URL.createObjectURL(file);
+      const safeName = escapeHtml(file.name || 'Фото');
       return `
-        <div class="multi-preview-item" title="${file.name || 'Фото'}">
-          <img src="${tempUrl}" alt="${file.name || 'Фото'}">
+        <div class="multi-preview-item" title="${safeName}">
+          <img src="${tempUrl}" alt="${safeName}">
           <button type="button" class="multi-preview-remove" onclick="window.galleryApp.removeSelectedFile(${idx})" title="Прибрати це фото">✕</button>
         </div>
       `;
@@ -327,11 +339,15 @@ class LyceumGalleryApp {
   populateAlbumSelect() {
     if (!this.targetAlbumSelect) return;
     this.targetAlbumSelect.innerHTML = this.albums.map(a => `
-      <option value="${a.id}" ${this.currentAlbumId === a.id ? 'selected' : ''}>${a.title}</option>
+      <option value="${escapeHtml(a.id)}" ${this.currentAlbumId === a.id ? 'selected' : ''}>${escapeHtml(a.title)}</option>
     `).join("");
   }
 
   async handleUploadPhoto() {
+    if (!window.adminAuth || !window.adminAuth.isAdmin) {
+      alert("Завантаження фото доступне виключно адміністратору партії!");
+      return;
+    }
     if (this.selectedFiles.length === 0) {
       alert("Будь ласка, оберіть фотографії або вставте їх через Ctrl + V.");
       return;
@@ -395,6 +411,10 @@ class LyceumGalleryApp {
   }
 
   deletePhoto(photoId) {
+    if (!window.adminAuth || !window.adminAuth.isAdmin) {
+      alert("Видалення фото доступне виключно адміністратору партії!");
+      return;
+    }
     const album = this.albums.find(a => a.id === this.currentAlbumId);
     if (!album) return;
     const photo = album.photos.find(p => p.id === photoId);
@@ -479,9 +499,13 @@ class LyceumGalleryApp {
     this.foldersGrid.innerHTML = this.albums.map(album => {
       const count = album.photos.length;
       const previewThumbs = album.photos.slice(0, 3);
+      const safeId = escapeHtml(album.id);
+      const safeTitle = escapeHtml(album.title);
+      const safeDesc = escapeHtml(album.desc);
+      const safeDate = escapeHtml(album.date);
 
       return `
-        <div class="folder-card" onclick="window.galleryApp.openFolder('${album.id}')">
+        <div class="folder-card" onclick="window.galleryApp.openFolder('${safeId}')">
           <div class="folder-top-row">
             <div class="folder-icon-wrap">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -491,19 +515,19 @@ class LyceumGalleryApp {
             <span class="folder-count-badge">📁 ${count} фото</span>
           </div>
 
-          <h3 class="folder-title">${album.title}</h3>
-          <p class="folder-desc">${album.desc}</p>
+          <h3 class="folder-title">${safeTitle}</h3>
+          <p class="folder-desc">${safeDesc}</p>
 
           <div class="folder-previews-collage" style="${count === 0 ? 'display:flex; align-items:center; justify-content:center; background:rgba(0,255,102,0.03); border:1px dashed rgba(0,255,102,0.2);' : ''}">
             ${count === 0
               ? `<span style="font-size: 11px; color: var(--text-muted);">📷 Папка готова до фотографій</span>`
               : previewThumbs.map(p => `
-                <img src="${p.src}" alt="Фото" class="folder-preview-img" loading="lazy">
+                <img src="${escapeHtml(p.src)}" alt="Фото" class="folder-preview-img" loading="lazy">
               `).join("")}
           </div>
 
           <div class="folder-footer-row">
-            <span>📅 ${album.date}</span>
+            <span>📅 ${safeDate}</span>
             <span style="color: var(--neon-green); font-weight: 700;">Відкрити папку →</span>
           </div>
         </div>
@@ -540,17 +564,21 @@ class LyceumGalleryApp {
       }
 
       // Чиста сітка фотографій без будь-яких підписів чи тексту
-      this.photosGrid.innerHTML = album.photos.map((photo, idx) => `
+      this.photosGrid.innerHTML = album.photos.map((photo, idx) => {
+        const safeId = escapeHtml(photo.id);
+        const safeSrc = escapeHtml(photo.src);
+        return `
         <div class="photo-card" onclick="window.galleryApp.openLightbox(${idx})">
-          <button type="button" class="btn-photo-delete admin-only" onclick="event.stopPropagation(); window.galleryApp.deletePhoto('${photo.id}')" title="Видалити фото">
+          <button type="button" class="btn-photo-delete admin-only" onclick="event.stopPropagation(); window.galleryApp.deletePhoto('${safeId}')" title="Видалити фото">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="3 6 5 6 21 6"></polyline>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
           </button>
-          <img src="${photo.src}" alt="Фото" class="photo-thumb" loading="lazy">
+          <img src="${safeSrc}" alt="Фото" class="photo-thumb" loading="lazy">
         </div>
-      `).join("");
+      `;
+      }).join("");
     }
   }
 

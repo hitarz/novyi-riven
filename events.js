@@ -1603,12 +1603,14 @@ class HalloweenEventsApp {
       if (sortedTags.length > 0) {
         const chips = sortedTags.map(([tag, count]) => {
           const isUserVoted = userTags.includes(tag);
-          const escapedTag = escapeHtml(tag).replace(/'/g, "\\'");
+          const encodedTag = encodeURIComponent(tag).replace(/'/g, "%27");
+          const safeId = escapeHtml(item.id);
+          const safeTagLabel = escapeHtml(tag);
           return `
             <button type="button" class="costume-tag-chip ${isUserVoted ? 'voted' : ''}" 
-              onclick="window.halloweenApp.toggleTag('${item.id}', '${escapedTag}')"
+              onclick="window.halloweenApp.toggleTag('${safeId}', decodeURIComponent('${encodedTag}'))"
               title="${isUserVoted ? 'Ви проголосували за цей тег (натисніть щоб зняти)' : 'Проголосувати за цей тег'}">
-              <span>${escapeHtml(tag)}</span>
+              <span>${safeTagLabel}</span>
               <span class="tag-chip-count">${count}</span>
             </button>
           `;
@@ -1715,10 +1717,12 @@ class HalloweenEventsApp {
     this.presetTagsContainer.innerHTML = PRESET_TAGS.map(tag => {
       const isActive = userTags.includes(tag);
       const count = tagsMap[tag] || 0;
-      const escapedTag = tag.replace(/'/g, "\\'");
+      const encodedTag = encodeURIComponent(tag).replace(/'/g, "%27");
+      const safeCostumeId = escapeHtml(this.activeTagCostumeId);
+      const safeTag = escapeHtml(tag);
       return `
-        <button type="button" class="tag-preset-btn ${isActive ? 'active' : ''}" onclick="window.halloweenApp.toggleTag('${this.activeTagCostumeId}', '${escapedTag}')">
-          <span>${tag} ${count > 0 ? `<small style="opacity: 0.8; font-size: 11px; margin-left: 4px;">(${count})</small>` : ''}</span>
+        <button type="button" class="tag-preset-btn ${isActive ? 'active' : ''}" onclick="window.halloweenApp.toggleTag('${safeCostumeId}', decodeURIComponent('${encodedTag}'))">
+          <span>${safeTag} ${count > 0 ? `<small style="opacity: 0.8; font-size: 11px; margin-left: 4px;">(${count})</small>` : ''}</span>
           <span class="tag-preset-check">${isActive ? '✓' : '+'}</span>
         </button>
       `;
