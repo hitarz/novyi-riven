@@ -22,13 +22,14 @@
     const mascot = document.createElement('div');
     mascot.id = 'secretCornerMascot';
     mascot.className = 'secret-corner-mascot';
+    mascot.style.cssText = 'position: fixed; bottom: 0; right: 20px; z-index: 9980; width: 52px; height: 128px; cursor: pointer; user-select: none;';
     mascot.setAttribute('role', 'button');
     mascot.setAttribute('aria-label', 'Таємний спостерігач партії');
     mascot.title = 'Таємний координатор партії (клікніть!)';
     mascot.innerHTML = `
       <div class="mascot-speech-bubble" id="mascotBubble">${phrases[0]}</div>
-      <div class="mascot-img-wrap">
-        <img src="assets/secret_agent.png" alt="Секретний спостерігач" class="mascot-img" width="52" height="128" loading="lazy">
+      <div class="mascot-img-wrap" style="width: 52px; height: 128px; max-width: 52px; max-height: 128px; overflow: hidden; border-radius: 14px 14px 0 0; background: rgba(10,20,14,0.85); border: 1.5px solid rgba(0,255,102,0.35); border-bottom: none; box-shadow: 0 -4px 14px rgba(0,0,0,0.5);">
+        <img src="assets/secret_agent.png" alt="Секретний спостерігач" class="mascot-img" width="52" height="128" style="width: 52px; height: 128px; max-width: 52px; max-height: 128px; object-fit: cover; object-position: top center; display: block;" loading="lazy">
       </div>
     `;
 
@@ -47,11 +48,6 @@
       mascot.classList.add('active');
       mascot.classList.add('bounce');
       setTimeout(() => mascot.classList.remove('bounce'), 500);
-
-      clearTimeout(mascot._activeTimer);
-      mascot._activeTimer = setTimeout(() => {
-        mascot.classList.remove('active');
-      }, 2600);
 
       // Після 5 кліків поспіль — веселий пасхальний стрибок
       if (clickCount >= 5) {
@@ -74,10 +70,6 @@
         osc.start();
         osc.stop(audioCtx.currentTime + 0.22);
       } catch (err) {}
-    });
-
-    document.addEventListener('click', () => {
-      mascot.classList.remove('active');
     });
   }
 
