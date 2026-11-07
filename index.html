@@ -8,6 +8,8 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' https://countapi.mileshilliard.com;">
+  <title>Партія «Новий Рівень» — Офіційний сайт самоврядування</title>
+  
   <!-- OWASP Clickjacking Defense: Frame-Busting -->
   <style id="anti-clickjack">body{display:none !important;}</style>
   <script>
@@ -18,31 +20,38 @@
       top.location = self.location;
     }
   </script>
-  <link rel="stylesheet" href="style.css?v=2.7">
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css?v=4.0">
   <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
 </head>
 <body>
 
-  <!-- Easter egg glitch transition screen -->
-  <div id="glitchOverlay" class="glitch-overlay">
+  <!-- Secret Protocol Glitch Transition Overlay -->
+  <div id="glitchOverlay" class="glitch-overlay" aria-hidden="true">
     <div class="glitch-text">[ СЕКРЕТНИЙ ПРОТОКОЛ: АКТИВОВАНО ]</div>
-    <p style="color: #6ee7b7; font-family: monospace; font-size: 14px; margin-top: 12px;">Вхід до таємної системи квесту...</p>
+    <p style="color: var(--accent-hover); font-family: var(--font-mono); font-size: 13px; margin-top: 12px;">Авторизація та перехід до крипто-системи квесту...</p>
   </div>
 
-  <!-- Sticky Global Navigation Bar -->
-  <nav class="site-nav">
+  <!-- Global Navigation Header -->
+  <header class="site-nav">
     <div class="nav-container">
-      <a href="index.html" class="nav-brand">
-        <img src="assets/logo.jpg" alt="Новий Рівень" class="nav-logo-thumb" width="38" height="38" style="width: 38px; height: 38px; max-width: 38px; max-height: 38px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+      <a href="index.html" class="nav-brand" title="Партія Новий Рівень">
+        <img src="assets/logo.jpg" alt="Логотип партії Новий Рівень" class="nav-logo-thumb" width="36" height="36">
         <div class="nav-brand-text">
           <span class="nav-brand-title">Новий <span>Рівень</span></span>
-          <span class="nav-brand-sub">Партія на висоті!</span>
+          <span class="nav-brand-sub">Партія на висоті</span>
         </div>
       </a>
 
-      <div class="nav-links">
+      <!-- Desktop Nav Links -->
+      <nav class="nav-links" aria-label="Головна навігація">
         <a href="index.html" class="nav-link active">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
           </svg>
@@ -50,14 +59,14 @@
         </a>
 
         <a href="#goals" class="nav-link">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          <span>Цілі партії</span>
+          <span>Програма</span>
         </a>
 
         <a href="events.html" class="nav-link">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
             <line x1="16" y1="2" x2="16" y2="6"></line>
             <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -68,25 +77,26 @@
         </a>
 
         <a href="gallery.html" class="nav-link">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
             <circle cx="8.5" cy="8.5" r="1.5"></circle>
             <polyline points="21 15 16 10 5 21"></polyline>
           </svg>
           <span>Галерея</span>
         </a>
+      </nav>
 
-        <a href="https://t.me/zyabl1kkk" target="_blank" rel="noopener noreferrer" class="nav-link" style="color: var(--emerald-400);">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
-          </svg>
-          <span>Telegram</span>
-        </a>
-      </div>
+      <!-- Telegram Direct Contact Button -->
+      <a href="https://t.me/zyabl1kkk" target="_blank" rel="noopener noreferrer" class="btn-spotlight-secondary" style="height: 38px; padding: 0 16px; font-size: 13px; color: var(--accent-hover);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+        </svg>
+        <span>Telegram</span>
+      </a>
 
-      <!-- Mobile toggle -->
-      <button class="nav-mobile-toggle" id="mobileNavToggle" aria-label="Меню">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Mobile Menu Toggle Button -->
+      <button class="nav-mobile-toggle" id="mobileNavToggle" aria-label="Відкрити навігаційне меню" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="12" x2="21" y2="12"></line>
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -94,277 +104,311 @@
       </button>
     </div>
 
-    <!-- Mobile Dropdown -->
+    <!-- Mobile Dropdown Nav -->
     <div class="mobile-dropdown-menu" id="mobileDropdownMenu">
-      <a href="index.html" class="nav-link active">🏠 Головна сторінка</a>
-      <a href="#goals" class="nav-link">🎯 Цілі та Програма партії</a>
-      <a href="events.html" class="nav-link">🎃 Івенти (Битва костюмів)</a>
-      <a href="gallery.html" class="nav-link">📸 Галерея ліцею за подіями</a>
-      <a href="https://t.me/zyabl1kkk" target="_blank" rel="noopener noreferrer" class="nav-link">✈️ Написати президенту партії</a>
+      <a href="index.html" class="nav-link active">Головна сторінка</a>
+      <a href="#goals" class="nav-link">Цілі та програма партії</a>
+      <a href="events.html" class="nav-link">Івенти (Битва костюмів)</a>
+      <a href="gallery.html" class="nav-link">Галерея ліцею</a>
+      <a href="https://t.me/zyabl1kkk" target="_blank" rel="noopener noreferrer" class="nav-link">Написати президенту в Telegram</a>
     </div>
-  </nav>
+  </header>
 
-  <div class="main-container">
+  <!-- Main Content Container -->
+  <main class="main-container">
     
-    <!-- Header -->
-    <header class="header">
-      <div class="logo-wrapper" id="logoBadge" title="Новий Рівень">
-        <div class="logo-glow-ring"></div>
-        <img src="assets/logo.jpg" alt="Партія Новий Рівень" class="logo-img">
-        <!-- Секретна область над короною сови (пасхалка квесту) -->
-        <div id="secretCrown" class="secret-crown-hint" title="✨"></div>
-      </div>
-      <h1 class="brand-title">Новий <span>Рівень</span></h1>
-      <p class="brand-subtitle">Партія на висоті! :)</p>
-      
-      <div class="campaign-badge">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-        <span>Вибори учнівського самоврядування</span>
+    <!-- Hero Section -->
+    <section class="hero-box">
+      <!-- Interactive Owl Emblem with secret hotspot -->
+      <div class="emblem-ring" id="logoBadge" title="Партія «Новий Рівень» (клікніть 3 рази для квесту або 5 для адмінки)">
+        <img src="assets/logo.jpg" alt="Емблема партії Новий Рівень" class="emblem-photo" width="102" height="102">
+        <!-- Secret hotspot: click above the crown -->
+        <div id="secretCrown" class="crown-hotspot" title="Секретний протокол"></div>
       </div>
 
-      <!-- Quick Action Buttons -->
-      <div style="display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; justify-content: center;">
-        <a href="events.html" class="btn-spotlight-primary">
-          <span>🎃 Голосувати за костюми Хеловіну</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="hero-badge-capsule">
+        <span class="live-dot"></span>
+        <span>Вибори учнівського самоврядування 2026</span>
+      </div>
+
+      <h1 class="hero-headline">Партія <span>«Новий Рівень»</span></h1>
+      <p class="hero-subheadline">
+        Ми створюємо простір, де голос кожного учня має реальний вплив, шкільні заходи стають подіями, а самоврядування працює для ліцеїстів.
+      </p>
+
+      <div class="hero-cta-row">
+        <a href="events.html" class="btn-cta-primary">
+          <span>Голосувати за костюми Хеловіну</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </a>
 
-        <a href="#goals" class="btn-spotlight-secondary">
-          <span>📋 Наша програма</span>
+        <a href="#goals" class="btn-cta-secondary">
+          <span>Ознайомитися з програмою</span>
         </a>
       </div>
-    </header>
+    </section>
 
-    <!-- Active Event Spotlight Card -->
-    <div class="event-spotlight-card">
-      <div class="spotlight-glow"></div>
-      <div class="spotlight-header">
-        <span class="spotlight-tag">🎃 Сьогодні в ліцеї</span>
-        <span class="spotlight-status">Активний івент</span>
+    <!-- Active Event Spotlight (Halloween 2026 Live Card) -->
+    <section class="spotlight-panel" aria-label="Активна подія ліцею">
+      <div class="spotlight-info">
+        <div class="spotlight-meta-header">
+          <span class="status-tag-active">
+            <span class="live-dot"></span>
+            <span>Підсумки івенту</span>
+          </span>
+          <span class="spotlight-subtitle" style="color: var(--gold); font-weight: 600;">🏆 Голосування офіційно завершено</span>
+        </div>
+
+        <h2 class="spotlight-title">Битва костюмів: Хеловін 2026</h2>
+        <p class="spotlight-desc">
+          Голосування за найкращі костюми ліцею завершено! Результати зафіксовано, переможців визначено. Учасники на 1-му, 2-му та 3-му місцях отримують нагороди від партії!
+        </p>
+
+        <div class="spotlight-badges-group">
+          <span class="stat-chip">38 зареєстрованих образів</span>
+          <span class="stat-chip">Живий п'єдестал ТОП-3</span>
+          <span class="stat-chip">Офіційні результати</span>
+        </div>
       </div>
-      <h2 class="spotlight-title">Битва Костюмів: Хеловін 2026</h2>
-      <p class="spotlight-desc">
-        Оцінюйте образи однокласників у реальному часі! <b>Перші три місця отримають призи 🎁.</b> Дивіться п'єдестал лідерів з золотими коронами, підтримуйте свій клас та виводьте фаворитів у топ!
-      </p>
-      <div class="spotlight-actions">
-        <a href="events.html" class="btn-spotlight-primary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+
+      <div>
+        <a href="events.html" class="btn-cta-primary" style="white-space: nowrap;">
+          <span>Дивитися переможців</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
-          <span>Перейти до оцінки та ТОПу</span>
         </a>
       </div>
-    </div>
+    </section>
 
-    <!-- Goals & Promises Section Anchor -->
-    <div id="goals"></div>
-
-    <!-- Intro Card -->
-    <div class="cyber-card">
-      <div class="card-title">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-        </svg>
-        <span>Цілі та програма нашої партії</span>
-      </div>
-      <p class="intro-text">
-        Привіт, ліцейська родино! Настав час детально розповісти про кожний пункт нашої програми та пояснити, як саме ми втілюватимемо ваші ідеї в життя.
-      </p>
-    </div>
-
-    <!-- 7 Promises Section Title -->
-    <div class="program-section-title">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="8" y1="6" x2="21" y2="6"></line>
-        <line x1="8" y1="12" x2="21" y2="12"></line>
-        <line x1="8" y1="18" x2="21" y2="18"></line>
-        <line x1="3" y1="6" x2="3.01" y2="6"></line>
-        <line x1="3" y1="12" x2="3.01" y2="12"></line>
-        <line x1="3" y1="18" x2="3.01" y2="18"></line>
-      </svg>
-      <span>7 головних обіцянок партії «Новий Рівень»:</span>
-    </div>
-
-    <!-- 7 Promises Cards Grid -->
-    <div class="program-grid">
-
-      <!-- 1 -->
-      <div class="promise-card">
-        <div class="promise-header">
-          <span class="promise-num">1️⃣</span>
-          <h3 class="promise-title">Пошта ідей та щотижневі опитування ✉️</h3>
-        </div>
-        <p class="promise-body">
-          Ми хочемо, щоб голос кожного з вас був почутий. Ми запроваджуємо систему постійного зворотного зв'язку та щотижня проводитимемо опитування щодо ваших інтересів, пропозицій і бажань. Жодна цікава ідея не залишиться поза увагою — ми обговорюватимемо їх та узгоджуватимемо з адміністрацією для швидкої реалізації!
-        </p>
-      </div>
-
-      <!-- 2 -->
-      <div class="promise-card">
-        <div class="promise-header">
-          <span class="promise-num">2️⃣</span>
-          <h3 class="promise-title">Комп'ютерні активності та кіберспорт 🎮</h3>
-        </div>
-        <p class="promise-body">
-          Ми за якісний відпочинок після уроків! Якщо збиратиметься достатня кількість учасників, ми організовуватимемо ігрові вечори в Discord («Бункер», «Мафія», Jackbox, Kahoot), а також проведемо повноцінні командні турніри з ваших улюблених ігор.
-        </p>
-      </div>
-
-      <!-- 3 -->
-      <div class="promise-card">
-        <div class="promise-header">
-          <span class="promise-num">3️⃣</span>
-          <h3 class="promise-title">Реформування учнівської ради 🤝</h3>
-        </div>
-        <p class="promise-body">
-          Ми хочемо зробити учнівську раду дійсно сучасною та робочою. Зібрання стануть регулярними (зокрема онлайн у Discord), а до складу ради увійдуть справді вмотивовані учні, які готові діяти та реалізовувати проєкти, а не просто значитися у списках.
-        </p>
-      </div>
-
-      <!-- 4 -->
-      <div class="promise-card">
-        <div class="promise-header">
-          <span class="promise-num">4️⃣</span>
-          <h3 class="promise-title">Ліцейський альбом 📸</h3>
-        </div>
-        <p class="promise-body">
-          Ми створимо спільний відкритий альбом — історію нашого ліцею! Кожен клас зможе надсилати туди свої найкрутіші, найсмішніші та найпам'ятніші фотографії. Ми їх роздрукуємо, і цей альбом буде доступний у ліцеї для кожного з вас.
-        </p>
-      </div>
-
-      <!-- 5 -->
-      <div class="promise-card">
-        <div class="promise-header">
-          <span class="promise-num">5️⃣</span>
-          <h3 class="promise-title">Тематичні дні та збереження традицій 🎃🎄</h3>
-        </div>
-        <p class="promise-body">
-          Ми наполягатимемо на тому, щоб усі наші яскраві традиції обов'язково зберігалися та розвивалися! На Хеловін ми вдягаємо круті костюми, на Новий рік — знімаємо традиційні ліцейські фільми та ролики, а також проводимо День без рюкзаків, День св. Валентина та інші тематичні дні. Тематику наступних днів ми обиратимемо разом із вами через опитування!
-        </p>
-      </div>
-
-      <!-- 6 -->
-      <div class="promise-card">
-        <div class="promise-header">
-          <span class="promise-num">6️⃣</span>
-          <h3 class="promise-title">Розвиток та піар ліцейського TikTok 📱</h3>
-        </div>
-        <p class="promise-body">
-          У нашого ліцею є свій TikTok, і ми хочемо зробити його популярним! Ми шукаємо активних, креативних хлопців та дівчат, які хочуть знімати контент, тренди та розвивати наш акаунт. Якщо ти хочеш спробувати себе в ролі медіа-мейкера — двері нашої команди відкриті!
-        </p>
-      </div>
-
-      <!-- 7 -->
-      <div class="promise-card">
-        <div class="promise-header">
-          <span class="promise-num">7️⃣</span>
-          <h3 class="promise-title">Проведення дискотек у ліцеї 🪩</h3>
-        </div>
-        <p class="promise-body">
-          Дискотекам бути! Ми організовуватимемо ліцейські вечірки, де кожен зможе розслабитися, відкинути комплекси та круто провести час із друзями під хорошу музику.
-        </p>
-      </div>
-    </div>
-
-    <!-- Gallery Highlights Teaser -->
-    <div class="cyber-card" style="margin-top: 10px;">
-      <div class="card-title" style="justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-            <polyline points="21 15 16 10 5 21"></polyline>
+    <!-- Goals & Promises Section -->
+    <section id="goals">
+      <div class="section-head-wrap">
+        <div class="section-head-title-row">
+          <svg class="section-head-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
           </svg>
-          <span>Галерея ліцею за подіями</span>
+          <h2 class="section-head-title">Програма дій: 7 кроків Нового Рівня</h2>
         </div>
-        <a href="gallery.html" style="font-size: 13px; color: var(--neon-green); text-decoration: none; font-weight: 700;">
-          Всі альбоми →
+        <p class="section-head-sub">
+          Чіткий, прозорий план розвитку ліцею без популізму. Кожен пункт має конкретний механізм реалізації.
+        </p>
+      </div>
+
+      <div class="program-container">
+        
+        <!-- Flagship Initiative 01 -->
+        <article class="card-flagship">
+          <div class="flagship-number">01</div>
+          <div class="flagship-details">
+            <div>
+              <span class="card-tag">Діалог і зворотний зв'язок</span>
+            </div>
+            <h3 class="flagship-title">Пошта ідей та щотижневі опитування</h3>
+            <p class="flagship-body">
+              Ми хочемо, щоб голос кожного з вас був почутий. Ми запроваджуємо систему постійного зворотного зв'язку та щотижня проводитимемо опитування щодо ваших інтересів, пропозицій і бажань. Жодна цікава ідея не залишиться поза увагою — ми обговорюватимемо їх та узгоджуватимемо з адміністрацією для швидкої реалізації!
+            </p>
+          </div>
+        </article>
+
+        <!-- Initiatives 02 to 07 -->
+        <div class="initiatives-grid">
+          
+          <!-- 02 -->
+          <article class="initiative-card">
+            <div class="initiative-header">
+              <span class="initiative-num">02</span>
+              <span class="card-tag">Кіберспорт</span>
+            </div>
+            <h3 class="initiative-title">Комп'ютерні активності та кіберспорт</h3>
+            <p class="initiative-text">
+              Ми за якісний відпочинок після уроків! Якщо збиратиметься достатня кількість учасників, ми організовуватимемо ігрові вечори в Discord («Бункер», «Мафія», Jackbox, Kahoot), а також проведемо повноцінні командні турніри з ваших улюблених ігор.
+            </p>
+          </article>
+
+          <!-- 03 -->
+          <article class="initiative-card">
+            <div class="initiative-header">
+              <span class="initiative-num">03</span>
+              <span class="card-tag">Самоврядування</span>
+            </div>
+            <h3 class="initiative-title">Реформування учнівської ради</h3>
+            <p class="initiative-text">
+              Ми хочемо зробити учнівську раду дійсно сучасною та робочою. Зібрання стануть регулярними (зокрема онлайн у Discord), а до складу ради увійдуть справді вмотивовані учні, які готові діяти та реалізовувати проєкти, а не просто значитися у списках.
+            </p>
+          </article>
+
+          <!-- 04 -->
+          <article class="initiative-card">
+            <div class="initiative-header">
+              <span class="initiative-num">04</span>
+              <span class="card-tag">Пам'ять</span>
+            </div>
+            <h3 class="initiative-title">Ліцейський альбом</h3>
+            <p class="initiative-text">
+              Ми створимо спільний відкритий альбом — історію нашого ліцею! Кожен клас зможе надсилати туди свої найкрутіші, найсмішніші та найпам'ятніші фотографії. Ми їх роздрукуємо, і цей альбом буде доступний у ліцеї для кожного з вас.
+            </p>
+          </article>
+
+          <!-- 05 -->
+          <article class="initiative-card">
+            <div class="initiative-header">
+              <span class="initiative-num">05</span>
+              <span class="card-tag">Традиції</span>
+            </div>
+            <h3 class="initiative-title">Тематичні дні та збереження традицій</h3>
+            <p class="initiative-text">
+              Ми наполягатимемо на тому, щоб усі наші яскраві традиції обов'язково зберігалися та розвивалися! На Хеловін ми вдягаємо круті костюми, на Новий рік — знімаємо традиційні ліцейські фільми, проводимо День без рюкзаків та благодійні ярмарки.
+            </p>
+          </article>
+
+          <!-- 06 -->
+          <article class="initiative-card">
+            <div class="initiative-header">
+              <span class="initiative-num">06</span>
+              <span class="card-tag">Медіа</span>
+            </div>
+            <h3 class="initiative-title">Розвиток та піар ліцейського TikTok</h3>
+            <p class="initiative-text">
+              У нашого ліцею є свій TikTok, і ми хочемо зробити його популярним! Ми шукаємо активних, креативних хлопців та дівчат, які хочуть знімати контент, тренди та розвивати наш акаунт. Якщо ти хочеш спробувати себе в ролі медіа-мейкера — двері команди відкриті!
+            </p>
+          </article>
+
+          <!-- 07 -->
+          <article class="initiative-card">
+            <div class="initiative-header">
+              <span class="initiative-num">07</span>
+              <span class="card-tag">Дозвілля</span>
+            </div>
+            <h3 class="initiative-title">Проведення дискотек у ліцеї</h3>
+            <p class="initiative-text">
+              Дискотекам бути! Ми організовуватимемо ліцейські вечірки, де кожен зможе розслабитися, відкинути комплекси та круто провести час із друзями під хорошу музику в безпечній дружній атмосфері.
+            </p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery Highlights Preview -->
+    <section class="gallery-section-card" aria-label="Галерея подій ліцею">
+      <div class="gallery-header-row">
+        <div>
+          <h2 class="section-head-title">Галерея подій ліцею</h2>
+          <p class="section-head-sub">Офіційні фотозвіти та архіви ліцейських заходів за категоріями.</p>
+        </div>
+        <a href="gallery.html" class="btn-cta-secondary">
+          <span>Всі альбоми</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
         </a>
       </div>
-      <p class="intro-text" style="margin-bottom: 16px;">
-        У нас діє структурована галерея з підпапками за подіями нашого ліцею.
-      </p>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-        <a href="gallery.html#halloween_2026" style="text-decoration: none;" class="btn-spotlight-secondary">
-          <span>🎃 Хеловін 2026</span>
+      <div class="gallery-cards-grid">
+        <a href="gallery.html#halloween_2026" class="gallery-item-link">
+          <div class="gallery-label-group">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-hover);">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span class="gallery-label">Альбом «Хеловін 2026»</span>
+          </div>
+          <span class="gallery-link-arrow">→</span>
         </a>
-        <a href="gallery.html#general_album" style="text-decoration: none;" class="btn-spotlight-secondary">
-          <span>📸 Загальний альбом ліцею</span>
+
+        <a href="gallery.html#general_album" class="gallery-item-link">
+          <div class="gallery-label-group">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-hover);">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <span class="gallery-label">Загальний альбом ліцею</span>
+          </div>
+          <span class="gallery-link-arrow">→</span>
         </a>
       </div>
-    </div>
+    </section>
 
-    <!-- Call to Action Box -->
-    <div class="cta-box">
-      <h2 class="cta-title">Зробимо шкільне життя яскравим разом! 🚀</h2>
-      <p class="cta-text">
-        Пам'ятайте: ви завжди можете звернутися до нас із будь-яким питанням чи ідеєю. Ми поруч і готові допомагати як у шкільних ініціативах, так і в навчанні!<br><br>
-        <b style="color: var(--neon-green); font-size: 15px;">Голосуйте за кандидатів від партії «Новий рівень»!</b>
+    <!-- President Call to Action -->
+    <section class="president-cta-panel">
+      <h2 class="cta-heading">Зробимо шкільне життя яскравим разом!</h2>
+      <p class="cta-paragraph">
+        Пам'ятайте: ви завжди можете звернутися до нас із будь-яким питанням чи ідеєю. Ми поруч і готові допомагати як у шкільних ініціативах, так і в навчанні!<br>
+        <b style="color: var(--accent-hover); display: inline-block; margin-top: 8px;">Голосуйте за кандидатів від партії «Новий Рівень»!</b>
       </p>
-
-      <a href="https://t.me/zyabl1kkk" target="_blank" rel="noopener noreferrer" class="btn-telegram">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <a href="https://t.me/zyabl1kkk" target="_blank" rel="noopener noreferrer" class="btn-tg-official">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
         </svg>
         <span>Написати нашому президенту в Telegram</span>
       </a>
-    </div>
+    </section>
 
-    <!-- Footer with discreet secret link -->
-    <footer class="footer">
-      <p>&copy; Партія «Новий Рівень». Всі права захищено.</p>
-      <p style="margin-top: 4px;">
+  </main>
+
+  <!-- Site Footer with Easter Egg Trigger -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <p>&copy; 2026 Партія «Новий Рівень». Всі права захищено.</p>
+      <div style="display: flex; align-items: center; gap: 8px;">
         <span>Платформа самоврядування ліцею</span>
-        <!-- Секретна крапка (пасхалка квесту) -->
-        <span id="secretDot" class="secret-dot" title="Секретний протокол"> • [квест]</span>
-      </p>
-    </footer>
-  </div>
+        <!-- Secret trigger for quest protocol -->
+        <span id="secretDot" class="footer-secret-dot" title="Секретний протокол">• [квест]</span>
+      </div>
+    </div>
+  </footer>
 
+  <!-- Scripts: Mobile Navigation & Secret Quest Easter Egg -->
   <script>
-    // Мобільне навігаційне меню
+    // 1. Mobile Navigation Toggle
     const mobileNavToggle = document.getElementById('mobileNavToggle');
     const mobileDropdownMenu = document.getElementById('mobileDropdownMenu');
     if (mobileNavToggle && mobileDropdownMenu) {
       mobileNavToggle.addEventListener('click', () => {
-        mobileDropdownMenu.classList.toggle('open');
+        const isOpen = mobileDropdownMenu.classList.toggle('open');
+        mobileNavToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+      mobileDropdownMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          mobileDropdownMenu.classList.remove('open');
+          mobileNavToggle.setAttribute('aria-expanded', 'false');
+        });
       });
     }
 
-    // ==========================================
-    // ПАСХАЛКА: перехід на сторінку квесту
-    // ==========================================
+    // 2. Secret Quest Protocol Transition
     function triggerQuestTransition() {
       const overlay = document.getElementById('glitchOverlay');
-      overlay.style.display = 'flex';
+      if (overlay) overlay.style.display = 'flex';
 
-      // Відправка кліку у CounterAPI (працює у фоні через keepalive)
+      // Background hit counter
       try {
         fetch('https://countapi.mileshilliard.com/api/v1/hit/novyi_riven_quest_clicks_licey_2026', {
           keepalive: true,
           cache: 'no-cache'
         }).catch(() => {});
       } catch (e) {}
-      
-      // Легкий звуковий ефект (Web Audio API)
+
+      // Web Audio API feedback chime
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = 'sawtooth';
+        osc.type = 'sine';
         osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.28);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.38);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.4);
+        osc.stop(audioCtx.currentTime + 0.38);
       } catch (e) {}
 
       setTimeout(() => {
@@ -372,7 +416,7 @@
       }, 700);
     }
 
-    // 1. Секретна область над короною сови (клік / тап)
+    // Trigger A: Click on secret crown hotspot over the owl emblem
     const secretCrown = document.getElementById('secretCrown');
     if (secretCrown) {
       secretCrown.addEventListener('click', (e) => {
@@ -381,28 +425,30 @@
       });
     }
 
-    // 2. Потрійний клік на логотип (мобільна пасхалка)
+    // Trigger B: Triple click on emblem
     let tapCount = 0;
-    let tapTimeout = null;
+    let tapTimer = null;
     const logoBadge = document.getElementById('logoBadge');
     if (logoBadge) {
       logoBadge.addEventListener('click', () => {
         tapCount++;
-        clearTimeout(tapTimeout);
+        clearTimeout(tapTimer);
         if (tapCount >= 3) {
           triggerQuestTransition();
         } else {
-          tapTimeout = setTimeout(() => { tapCount = 0; }, 600);
+          tapTimer = setTimeout(() => { tapCount = 0; }, 600);
         }
       });
     }
 
-    // 3. Непримітна крапка в футері
+    // Trigger C: Secret footer dot
     const secretDot = document.getElementById('secretDot');
     if (secretDot) {
       secretDot.addEventListener('click', triggerQuestTransition);
     }
   </script>
+
+  <!-- Project scripts: admin authorization & interactive corner mascot -->
   <script src="admin.js?v=3.2"></script>
   <script src="mascot.js"></script>
 </body>

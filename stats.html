@@ -2,11 +2,14 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Статистика квесту — Партія «Новий Рівень»</title>
+  <meta name="theme-color" content="#060b08">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' https://countapi.mileshilliard.com;">
+  
   <!-- OWASP Clickjacking Defense: Frame-Busting -->
   <style id="anti-clickjack">body{display:none !important;}</style>
   <script>
@@ -17,33 +20,42 @@
       top.location = self.location;
     }
   </script>
-  <link rel="stylesheet" href="style.css?v=2.7">
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css?v=4.0">
   <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+
   <style>
     .counter-display {
-      font-size: 72px;
-      font-weight: 900;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      color: var(--neon-green);
-      text-shadow: 0 0 30px var(--neon-green-glow);
-      margin: 20px 0;
-      letter-spacing: 2px;
+      font-size: clamp(48px, 10vw, 76px);
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--accent-hover);
+      margin: 16px 0;
+      letter-spacing: -0.02em;
+      line-height: 1;
     }
     .stats-card {
       text-align: center;
-      padding: 36px 24px;
+      padding: 40px 24px;
     }
     .stats-label {
-      font-size: 14px;
+      font-family: var(--font-mono);
+      font-size: 13px;
       text-transform: uppercase;
-      letter-spacing: 2px;
-      color: var(--emerald-400);
-      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      font-weight: 600;
     }
     .stats-meta {
+      font-family: var(--font-mono);
       font-size: 12px;
       color: var(--text-muted);
-      margin-top: 14px;
+      margin-top: 20px;
     }
     .stats-btn-row {
       display: flex;
@@ -56,7 +68,7 @@
 </head>
 <body>
 
-  <div class="main-container" style="max-width: 580px;">
+  <div class="main-container" style="max-width: 620px;">
     <!-- Top Navigation Bar -->
     <nav class="top-bar">
       <a href="index.html" class="btn-back">
@@ -69,13 +81,12 @@
     </nav>
 
     <!-- Header -->
-    <header class="header">
-      <div class="logo-wrapper" style="width: 100px; height: 100px;">
-        <div class="logo-glow-ring"></div>
-        <img src="assets/logo.jpg" alt="Новий Рівень" class="logo-img">
+    <header style="text-align: center; margin-bottom: 24px;">
+      <div class="emblem-ring" style="width: 88px; height: 88px; margin: 0 auto 16px;">
+        <img src="assets/logo.jpg" alt="Новий Рівень" class="emblem-photo">
       </div>
-      <h1 class="brand-title">Аналітика <span>Квесту</span></h1>
-      <p class="brand-subtitle">Панель адміністратора</p>
+      <h1 class="hero-headline" style="font-size: clamp(26px, 4vw, 36px); margin-bottom: 6px;">Аналітика <span>Квесту</span></h1>
+      <p style="font-size: 14px; color: var(--text-muted);">Панель адміністратора</p>
     </header>
 
     <div class="cyber-card stats-card">
@@ -83,12 +94,12 @@
       
       <div id="counterValue" class="counter-display">...</div>
 
-      <p class="card-desc" style="margin-bottom: 0;">
+      <p class="section-description" style="margin: 0 auto; text-align: center;">
         Фіксує кожне відкриття секретного терміналу через корону сови, потрійний тап чи посилання.
       </p>
 
       <div class="stats-btn-row">
-        <button type="button" id="refreshBtn" class="btn-primary" style="height: 44px; padding: 0 24px; width: auto; font-size: 14px;">
+        <button type="button" id="refreshBtn" class="btn-primary" style="height: 44px; padding: 0 22px; font-size: 14px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"></polyline>
             <polyline points="1 20 1 14 7 14"></polyline>
@@ -97,16 +108,18 @@
           <span>Оновити дані</span>
         </button>
 
-        <a href="https://countapi.mileshilliard.com/api/v1/get/novyi_riven_quest_clicks_licey_2026" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="font-size: 13px;">
-          <span>🌐 Прямий CounterAPI JSON</span>
+        <a href="https://countapi.mileshilliard.com/api/v1/get/novyi_riven_quest_clicks_licey_2026" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="font-size: 13.5px; height: 44px;">
+          <span>🌐 JSON API</span>
         </a>
       </div>
 
       <div id="lastUpdated" class="stats-meta">Оновлено щойно</div>
     </div>
 
-    <footer class="footer">
-      <p>&copy; Партія «Новий Рівень». Внутрішня статистика переходів.</p>
+    <footer class="footer" style="background: transparent; border-top: 1px solid var(--border-subtle); padding: 24px 0 32px; margin-top: 24px;">
+      <div style="text-align: center;">
+        <p>&copy; Партія «Новий Рівень». Внутрішня статистика переходів.</p>
+      </div>
     </footer>
   </div>
 
@@ -124,7 +137,6 @@
         if (!res.ok) throw new Error('Помилка сервера статистики');
         const data = await res.json();
         
-        // Відображаємо значення
         const val = typeof data.value === 'number' ? data.value : 0;
         counterValue.textContent = val.toLocaleString();
         lastUpdated.textContent = 'Останнє оновлення: ' + new Date().toLocaleTimeString();

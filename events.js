@@ -48,12 +48,12 @@ function generateCostumeSvg(type, bgGrad1, bgGrad2, accentColor) {
 // За замовчуванням список пустий — костюми завантажуються користувачем
 const DEFAULT_COSTUMES = [];
 
-const STORAGE_KEY_COSTUMES = "novyi_riven_halloween_costumes_v3";
-const STORAGE_KEY_VOTES = "novyi_riven_user_costume_votes_v3";
-const STORAGE_KEY_USER_TAGS = "novyi_riven_costume_user_tags_v2";
+const STORAGE_KEY_COSTUMES = "novyi_riven_halloween_costumes_v4";
+const STORAGE_KEY_VOTES = "novyi_riven_user_costume_votes_v4";
+const STORAGE_KEY_USER_TAGS = "novyi_riven_costume_user_tags_v3";
 
 /**
- * БІЛИЙ СПИСОК офіційних костюмів конкурсу (40 учасників).
+ * БІЛИЙ СПИСОК офіційних костюмів конкурсу (26 учасників).
  * Будь-який костюм із Firebase, ID якого ВІДСУТНІЙ у цьому списку,
  * буде автоматично ВІДХИЛЕНО та ВИДАЛЕНО з бази даних.
  * Це головний захист від зловмисного додавання нових кандидатів через прямі HTTP-запити.
@@ -61,25 +61,16 @@ const STORAGE_KEY_USER_TAGS = "novyi_riven_costume_user_tags_v2";
 const ALLOWED_COSTUME_IDS = new Set([
   "costume_1793798348570",
   "costume_1793735651680",
-  "costume_1793735576484",
-  "costume_1793735570960",
-  "costume_1793735490029",
-  "costume_1793735398534",
-  "costume_1793735378243",
-  "costume_1793735369622",
   "costume_1793735343519",
-  "costume_1793735307666",
   "costume_1793735212151",
   "costume_1793735193442",
   "costume_1793735160306",
-  "costume_1793718047281",
   "costume_1793703589019",
   "costume_1793703514462",
   "costume_1793703473213",
   "costume_1793703420853",
   "costume_1793703404321",
   "costume_1793703348538",
-  "costume_1793703288837",
   "costume_1793703203413",
   "costume_1793703180018",
   "costume_1793652388267",
@@ -89,16 +80,11 @@ const ALLOWED_COSTUME_IDS = new Set([
   "costume_1793646696429",
   "costume_1793646675767",
   "costume_1793646546773",
-  "costume_1793646509043",
-  "costume_1793646481927",
   "costume_1793646454313",
   "costume_1793646431193",
   "costume_1793646351387",
-  "costume_1793646259872",
   "costume_1793645711089",
-  "costume_1793644757797",
-  "costume_1793643890850",
-  "costume_1793646664201"
+  "costume_1793643890850"
 ]);
 
 /** Максимально допустимий приріст голосів за одну транзакцію */
@@ -332,8 +318,12 @@ class HalloweenEventsApp {
     try {
       localStorage.removeItem("novyi_riven_halloween_costumes_v1");
       localStorage.removeItem("novyi_riven_halloween_costumes_v2");
+      localStorage.removeItem("novyi_riven_halloween_costumes_v3");
       localStorage.removeItem("novyi_riven_user_costume_votes_v1");
       localStorage.removeItem("novyi_riven_user_costume_votes_v2");
+      localStorage.removeItem("novyi_riven_user_costume_votes_v3");
+      localStorage.removeItem("novyi_riven_costume_user_tags_v1");
+      localStorage.removeItem("novyi_riven_costume_user_tags_v2");
     } catch (e) {}
   }
 

@@ -278,7 +278,7 @@
       let logoClicks = 0;
       let logoTimeout = null;
       document.addEventListener("click", (e) => {
-        const target = e.target.closest(".nav-logo, #logoBadge");
+        const target = e.target.closest(".nav-logo, .nav-logo-thumb, #logoBadge, .nav-brand");
         if (target) {
           logoClicks++;
           clearTimeout(logoTimeout);
@@ -292,7 +292,7 @@
       });
     }
 
-    promptPin() {
+    async promptPin() {
       if (this.isAdmin) {
         if (confirm("Ви вже в режимі адміністратора. Бажаєте вийти?")) {
           this.logout();
@@ -303,7 +303,8 @@
       const pin = prompt("🔐 Введіть PIN-код адміністратора партії:");
       if (pin === null) return; // Скасовано
 
-      if (this.login(pin.trim())) {
+      const success = await this.login(pin.trim());
+      if (success) {
         alert("✅ Режим адміністратора успішно активовано! Тепер вам доступні всі кнопки завантаження та видалення.");
       } else {
         alert("❌ Невірний PIN-код адміністратора.");
