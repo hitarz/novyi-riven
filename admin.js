@@ -2,9 +2,10 @@
  * Партія «Новий Рівень» — Модуль управління контентом
  */
 (function() {
-  // SHA-256 хеш пін-коду адміна — захищає від перегляду пароля в DevTools
-  // УВАГА: не змінюйте цей рядок без оновлення пін-коду
-  const ADMIN_PIN_HASH = "d103b1a477ee8cc92037b21f5ebff71a23e08bd561b7d9e63479f0bb5c93d627";
+  // SHA-256 хеш пароля адміна (2026) — захищає від перегляду пароля в DevTools
+  const ADMIN_PIN_HASH = "158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab";
+  // Резервний хеш для сумісності
+  const ADMIN_PIN_HASH_ALT = "d103b1a477ee8cc92037b21f5ebff71a23e08bd561b7d9e63479f0bb5c93d627";
   // Секрет сесії — використовується для перевірки що сесія видана цим сайтом
   const SESSION_SECRET = "d9c2948df34e07f4657e6fe5595dd6dc233f0dc484166e2b6bc8770333957584";
   const STORAGE_KEY_ADMIN = "novyi_riven_admin_session_v2";
@@ -100,7 +101,7 @@
         const adminParam = params.get("admin");
         if (adminParam) {
           const h = await sha256(adminParam);
-          if (h === ADMIN_PIN_HASH) {
+          if (h === ADMIN_PIN_HASH || h === ADMIN_PIN_HASH_ALT) {
             this.isAdmin = true;
             await this.saveSession();
             this.applyState();
@@ -115,7 +116,7 @@
 
     async login(pin) {
       const h = await sha256(pin);
-      if (h === ADMIN_PIN_HASH) {
+      if (h === ADMIN_PIN_HASH || h === ADMIN_PIN_HASH_ALT) {
         this.isAdmin = true;
         await this.saveSession();
         this.applyState();
@@ -176,8 +177,10 @@
         btnFirebase.addEventListener("click", () => {
           if (window.halloweenApp && typeof window.halloweenApp.seedFirebaseFromLocal === "function") {
             window.halloweenApp.seedFirebaseFromLocal();
+          } else if (window.galleryApp && typeof window.galleryApp.seedFirebaseFromLocal === "function") {
+            window.galleryApp.seedFirebaseFromLocal();
           } else {
-            this.showAdminToast("ℹ️ Синхронізація доступна на сторінці Івентів");
+            this.showAdminToast("ℹ️ Синхронізація з хмарою доступна на сторінках Галереї та Івентів");
           }
         });
       }
@@ -292,7 +295,7 @@
       });
     }
 
-    promptPin() {
+    async promptPin() {
       if (this.isAdmin) {
         if (confirm("Ви вже в режимі адміністратора. Бажаєте вийти?")) {
           this.logout();
@@ -303,7 +306,8 @@
       const pin = prompt("🔐 Введіть PIN-код адміністратора партії:");
       if (pin === null) return; // Скасовано
 
-      if (this.login(pin.trim())) {
+      const success = await this.login(pin.trim());
+      if (success) {
         alert("✅ Режим адміністратора успішно активовано! Тепер вам доступні всі кнопки завантаження та видалення.");
       } else {
         alert("❌ Невірний PIN-код адміністратора.");

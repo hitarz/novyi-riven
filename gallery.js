@@ -1,5 +1,6 @@
 /**
  * Партія «Новий Рівень» — Фотогалерея ліцею
+ * З підтримкою Live-хмари Google Firebase: синхронізація фотографій наживо без комітів
  */
 
 // Екранування HTML від XSS
@@ -13,7 +14,7 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-// Початкові альбоми ліцею
+// Початкові чисті альбоми ліцею
 const DEFAULT_ALBUMS = [
   {
     id: "halloween_2026",
@@ -33,10 +34,13 @@ const DEFAULT_ALBUMS = [
   }
 ];
 
-const STORAGE_KEY_GALLERY = "novyi_riven_gallery_albums_v3";
+const STORAGE_KEY_GALLERY = "novyi_riven_gallery_albums_v4";
 
 class LyceumGalleryApp {
   constructor() {
+    this.db = null;
+    this.isFirebaseLive = false;
+    this.uploadMode = "files"; // "files" | "urls"
     this.albums = this.loadAlbums();
     this.currentAlbumId = null; // null = список папок, string = перегляд папки
     this.activePhotoList = [];
@@ -45,30 +49,171 @@ class LyceumGalleryApp {
 
     this.initDOMElements();
     this.attachEvents();
+    this.initTabs();
+    this.initCreateAlbumModal();
     this.checkUrlHash();
+    this.initFirebase();
     this.checkRemoteData();
     this.render();
   }
 
   loadAlbums() {
     try {
+      // Повне очищення старих кешів попередніх версій
       localStorage.removeItem("novyi_riven_gallery_albums_v1");
       localStorage.removeItem("novyi_riven_gallery_albums_v2");
+      localStorage.removeItem("novyi_riven_gallery_albums_v3");
       const data = localStorage.getItem(STORAGE_KEY_GALLERY);
       if (data) {
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
       }
     } catch (e) {
       console.warn("Помилка завантаження альбомів:", e);
     }
     this.saveAlbums(DEFAULT_ALBUMS);
-    return DEFAULT_ALBUMS;
+    return JSON.parse(JSON.stringify(DEFAULT_ALBUMS));
   }
 
   saveAlbums(list) {
     try {
       localStorage.setItem(STORAGE_KEY_GALLERY, JSON.stringify(list));
     } catch (e) {}
+  }
+
+  initFirebase() {
+    if (typeof firebase === "undefined" || !window.FIREBASE_CONFIG) {
+      console.warn("Firebase SDK або FIREBASE_CONFIG не знайдені, працюємо в локальному режимі.");
+      this.updateLiveIndicator(false);
+      return;
+    }
+
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(window.FIREBASE_CONFIG);
+      }
+      this.db = firebase.database();
+
+      // Індикатор зв'язку із сервером
+      const connectedRef = this.db.ref(".info/connected");
+      connectedRef.on("value", (snap) => {
+        const isOnline = snap.val() === true;
+        this.isFirebaseLive = isOnline;
+        this.updateLiveIndicator(isOnline);
+      });
+
+      // Підписка на живі дані галереї у реальному часі
+      this.db.ref("gallery_live").on("value", (snapshot) => {
+        const liveData = snapshot.val();
+        if (!liveData) return;
+
+        let changed = false;
+
+        // 1. Синхронізація створених альбомів з хмари
+        if (liveData.albums && typeof liveData.albums === "object") {
+          for (const [albId, albData] of Object.entries(liveData.albums)) {
+            if (!albData) continue;
+            let existing = this.albums.find(a => a.id === albId);
+            if (!existing) {
+              this.albums.push({
+                id: albId,
+                title: albData.title || albId,
+                desc: albData.desc || "",
+                date: albData.date || "",
+                category: albData.category || "event",
+                photos: []
+              });
+              changed = true;
+            } else {
+              if (albData.title && existing.title !== albData.title) {
+                existing.title = albData.title;
+                changed = true;
+              }
+              if (albData.desc && existing.desc !== albData.desc) {
+                existing.desc = albData.desc;
+                changed = true;
+              }
+            }
+          }
+        }
+
+        // 2. Синхронізація фотографій за альбомами
+        if (liveData.photos && typeof liveData.photos === "object") {
+          for (const [albId, photosMap] of Object.entries(liveData.photos)) {
+            let targetAlbum = this.albums.find(a => a.id === albId);
+            if (!targetAlbum) {
+              targetAlbum = {
+                id: albId,
+                title: albId,
+                desc: "",
+                date: "",
+                category: "event",
+                photos: []
+              };
+              this.albums.push(targetAlbum);
+              changed = true;
+            }
+
+            if (photosMap && typeof photosMap === "object") {
+              const cloudPhotosList = Object.values(photosMap).filter(p => p && p.src);
+              // Сортуємо: свіжіші фото спочатку
+              cloudPhotosList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+              // Перевірка змін
+              const cloudIds = new Set(cloudPhotosList.map(p => p.id));
+              const localIds = new Set(targetAlbum.photos.map(p => p.id));
+
+              if (cloudIds.size !== localIds.size || [...cloudIds].some(id => !localIds.has(id))) {
+                targetAlbum.photos = cloudPhotosList;
+                changed = true;
+              }
+            } else {
+              if (targetAlbum.photos.length > 0) {
+                targetAlbum.photos = [];
+                changed = true;
+              }
+            }
+          }
+        }
+
+        if (changed) {
+          this.saveAlbums(this.albums);
+          this.render();
+          this.populateAlbumSelect();
+        }
+      }, (error) => {
+        console.warn("Помилка синхронізації gallery_live у Firebase:", error);
+        this.updateLiveIndicator(false, error.message);
+      });
+    } catch (err) {
+      console.warn("Помилка ініціалізації Firebase у галереї:", err);
+      this.isFirebaseLive = false;
+      this.updateLiveIndicator(false);
+    }
+  }
+
+  updateLiveIndicator(isOnline, errorMsg) {
+    const textEl = document.getElementById("liveSyncStatusGallery");
+    const dotEl = document.getElementById("galleryLiveIndicatorDot");
+    if (!textEl) return;
+
+    if (isOnline) {
+      textEl.textContent = "Live-хмара онлайн ⚡ (без комітів)";
+      textEl.style.color = "var(--neon-green)";
+      if (dotEl) {
+        dotEl.style.backgroundColor = "var(--neon-green)";
+        dotEl.style.boxShadow = "0 0 10px rgba(0, 255, 102, 0.6)";
+      }
+    } else {
+      textEl.textContent = "Локальний режим (хмара очікує підключення)";
+      textEl.style.color = "var(--text-muted)";
+      if (dotEl) {
+        dotEl.style.backgroundColor = "var(--text-muted)";
+        dotEl.style.boxShadow = "none";
+      }
+    }
   }
 
   async checkRemoteData() {
@@ -83,7 +228,7 @@ class LyceumGalleryApp {
             if (!localAlbum) {
               this.albums.push(ra);
               changed = true;
-            } else if (Array.isArray(ra.photos)) {
+            } else if (Array.isArray(ra.photos) && ra.photos.length > 0) {
               if (!Array.isArray(localAlbum.photos) || localAlbum.photos.length === 0) {
                 localAlbum.photos = [...ra.photos];
                 changed = true;
@@ -114,6 +259,7 @@ class LyceumGalleryApp {
     this.currentFolderTitle = document.getElementById("currentFolderTitle");
     this.currentFolderMeta = document.getElementById("currentFolderMeta");
     this.btnBackToFolders = document.getElementById("btnBackToFolders");
+    this.btnClearCurrentAlbum = document.getElementById("btnClearCurrentAlbum");
     this.mobileNavToggle = document.getElementById("mobileNavToggle");
     this.mobileDropdownMenu = document.getElementById("mobileDropdownMenu");
 
@@ -135,6 +281,8 @@ class LyceumGalleryApp {
     this.multiPreviewGrid = document.getElementById("galleryMultiPreviewGrid");
     this.multiCountEl = document.getElementById("galleryMultiCount");
     this.btnSubmitPhotos = document.getElementById("btnSubmitGalleryPhotos");
+    this.photoUrlsInput = document.getElementById("galleryPhotoUrls");
+    this.urlPreviewGrid = document.getElementById("galleryUrlPreviewGrid");
   }
 
   attachEvents() {
@@ -149,6 +297,13 @@ class LyceumGalleryApp {
     if (this.btnBackToFolders) {
       this.btnBackToFolders.addEventListener("click", () => {
         this.openFolder(null);
+      });
+    }
+
+    // Кнопка очищення поточної папки
+    if (this.btnClearCurrentAlbum) {
+      this.btnClearCurrentAlbum.addEventListener("click", () => {
+        this.clearCurrentAlbum();
       });
     }
 
@@ -187,7 +342,7 @@ class LyceumGalleryApp {
       if (e.key === "Escape") this.closeLightbox();
     });
 
-    // Відкриття модального вікна завантаження (тільки адмін)
+    // Відкриття модального вікна завантаження
     if (this.btnOpenUploadModal && this.uploadPhotoModal) {
       this.btnOpenUploadModal.addEventListener("click", () => {
         this.populateAlbumSelect();
@@ -216,7 +371,7 @@ class LyceumGalleryApp {
       this.photoFileInput.addEventListener("change", (e) => {
         if (e.target.files && e.target.files.length > 0) {
           this.addSelectedFiles(Array.from(e.target.files));
-          this.photoFileInput.value = ""; // Очищаємо для можливості повторного вибору
+          this.photoFileInput.value = "";
         }
       });
 
@@ -267,6 +422,10 @@ class LyceumGalleryApp {
           this.populateAlbumSelect();
           this.uploadPhotoModal.classList.add("open");
         }
+        // Перемикаємо на вкладку файлів
+        const tabFiles = document.getElementById("tabUploadFiles");
+        if (tabFiles) tabFiles.click();
+
         this.addSelectedFiles(pastedFiles);
         if (this.photoDropzone) {
           this.photoDropzone.classList.add("pasted-flash");
@@ -282,6 +441,148 @@ class LyceumGalleryApp {
         this.handleUploadPhoto();
       });
     }
+  }
+
+  initTabs() {
+    const tabFiles = document.getElementById("tabUploadFiles");
+    const tabUrls = document.getElementById("tabUploadUrls");
+    const contentFiles = document.getElementById("tabContentFiles");
+    const contentUrls = document.getElementById("tabContentUrls");
+
+    if (tabFiles && tabUrls && contentFiles && contentUrls) {
+      tabFiles.addEventListener("click", () => {
+        this.uploadMode = "files";
+        tabFiles.classList.add("active");
+        tabUrls.classList.remove("active");
+        contentFiles.style.display = "block";
+        contentUrls.style.display = "none";
+      });
+
+      tabUrls.addEventListener("click", () => {
+        this.uploadMode = "urls";
+        tabUrls.classList.add("active");
+        tabFiles.classList.remove("active");
+        contentFiles.style.display = "none";
+        contentUrls.style.display = "block";
+      });
+    }
+
+    // Живе прев'ю посилань
+    if (this.photoUrlsInput && this.urlPreviewGrid) {
+      this.photoUrlsInput.addEventListener("input", () => {
+        this.renderUrlPreviews();
+      });
+    }
+  }
+
+  renderUrlPreviews() {
+    if (!this.photoUrlsInput || !this.urlPreviewGrid) return;
+    const lines = this.photoUrlsInput.value
+      .split("\n")
+      .map(l => l.trim())
+      .filter(l => l.startsWith("http://") || l.startsWith("https://") || l.startsWith("data:image/"));
+
+    if (lines.length === 0) {
+      this.urlPreviewGrid.style.display = "none";
+      this.urlPreviewGrid.innerHTML = "";
+      return;
+    }
+
+    this.urlPreviewGrid.style.display = "grid";
+    this.urlPreviewGrid.innerHTML = lines.slice(0, 6).map((url) => `
+      <div class="multi-preview-item" title="${escapeHtml(url)}">
+        <img src="${escapeHtml(url)}" alt="Прев'ю" onerror="this.parentElement.style.opacity='0.4';">
+      </div>
+    `).join("");
+  }
+
+  initCreateAlbumModal() {
+    const btnOpen = document.getElementById("btnOpenCreateAlbumModal");
+    const modal = document.getElementById("createAlbumModal");
+    const btnClose = document.getElementById("btnCloseCreateAlbumModal");
+    const form = document.getElementById("createAlbumForm");
+
+    if (btnOpen && modal) {
+      btnOpen.addEventListener("click", () => {
+        modal.classList.add("open");
+      });
+    }
+
+    if (btnClose && modal) {
+      btnClose.addEventListener("click", () => {
+        modal.classList.remove("open");
+      });
+    }
+
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) modal.classList.remove("open");
+      });
+    }
+
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        this.handleCreateAlbum();
+      });
+    }
+  }
+
+  handleCreateAlbum() {
+    if (!window.adminAuth || !window.adminAuth.isAdmin) {
+      alert("Створення альбомів доступне виключно адміністратору партії!");
+      return;
+    }
+
+    const titleInput = document.getElementById("newAlbumTitle");
+    const descInput = document.getElementById("newAlbumDesc");
+    const dateInput = document.getElementById("newAlbumDate");
+
+    const title = (titleInput ? titleInput.value : "").trim();
+    if (!title) {
+      alert("Вкажіть назву альбому.");
+      return;
+    }
+
+    const desc = descInput ? descInput.value.trim() : "";
+    const date = dateInput && dateInput.value.trim() ? dateInput.value.trim() : new Date().toLocaleDateString("uk-UA");
+    const albumId = "album_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4);
+
+    const newAlbum = {
+      id: albumId,
+      title: title,
+      desc: desc || "Фотографії з події ліцею",
+      date: date,
+      category: "event",
+      photos: []
+    };
+
+    this.albums.push(newAlbum);
+    this.saveAlbums(this.albums);
+    this.render();
+    this.populateAlbumSelect();
+
+    if (this.db) {
+      this.db.ref(`gallery_live/albums/${albumId}`).set({
+        id: albumId,
+        title: newAlbum.title,
+        desc: newAlbum.desc,
+        date: newAlbum.date,
+        category: newAlbum.category
+      }).then(() => {
+        if (window.adminAuth && typeof window.adminAuth.showAdminToast === "function") {
+          window.adminAuth.showAdminToast(`📁 Альбом «${title}» створено наживо без коміту!`);
+        }
+      }).catch(err => console.warn(err));
+    }
+
+    const modal = document.getElementById("createAlbumModal");
+    if (modal) modal.classList.remove("open");
+    const form = document.getElementById("createAlbumForm");
+    if (form) form.reset();
+
+    // Переходимо до нового альбому
+    this.openFolder(albumId);
   }
 
   addSelectedFiles(files) {
@@ -345,10 +646,6 @@ class LyceumGalleryApp {
       alert("Завантаження фото доступне виключно адміністратору партії!");
       return;
     }
-    if (this.selectedFiles.length === 0) {
-      alert("Будь ласка, оберіть фотографії або вставте їх через Ctrl + V.");
-      return;
-    }
 
     const albumId = this.targetAlbumSelect ? this.targetAlbumSelect.value : (this.currentAlbumId || "halloween_2026");
     const album = this.albums.find(a => a.id === albumId);
@@ -358,10 +655,76 @@ class LyceumGalleryApp {
     }
 
     const submitBtn = this.btnSubmitPhotos || document.getElementById("btnSubmitGalleryPhotos");
-    const originalBtnText = submitBtn ? submitBtn.innerHTML : "Завантажити фото в альбом";
+    const originalBtnText = submitBtn ? submitBtn.innerHTML : "⚡ Опублікувати наживо в альбом";
+
+    // 1. Якщо обрано режим URL посилань
+    if (this.uploadMode === "urls") {
+      const rawUrls = this.photoUrlsInput ? this.photoUrlsInput.value : "";
+      const urls = rawUrls
+        .split("\n")
+        .map(u => u.trim())
+        .filter(u => u.startsWith("http://") || u.startsWith("https://") || u.startsWith("data:image/"));
+
+      if (urls.length === 0) {
+        alert("Будь ласка, вкажіть хоча б одне пряме посилання на фотографію (http:// або https://).");
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = `⏳ Додавання ${urls.length} фото...`;
+      }
+
+      const timestamp = Date.now();
+      const newPhotos = urls.map((url, i) => ({
+        id: `photo_${timestamp}_${i}_${Math.random().toString(36).substr(2, 5)}`,
+        src: url,
+        date: new Date().toLocaleDateString("uk-UA"),
+        timestamp: timestamp + i
+      }));
+
+      album.photos.unshift(...newPhotos);
+      this.saveAlbums(this.albums);
+
+      // Синхронізація з хмарою Firebase
+      if (this.db) {
+        const updates = {};
+        newPhotos.forEach(p => {
+          updates[`gallery_live/photos/${albumId}/${p.id}`] = p;
+        });
+        this.db.ref().update(updates).catch(err => console.warn("Firebase upload error:", err));
+      }
+
+      if (this.photoUrlsInput) this.photoUrlsInput.value = "";
+      if (this.urlPreviewGrid) this.urlPreviewGrid.style.display = "none";
+      if (this.uploadPhotoForm) this.uploadPhotoForm.reset();
+      if (this.uploadPhotoModal) this.uploadPhotoModal.classList.remove("open");
+
+      this.openFolder(albumId);
+
+      const successMsg = `📸 ${newPhotos.length} фото успішно додано наживо для всіх учнів (без коміту)!`;
+      if (window.adminAuth && typeof window.adminAuth.showAdminToast === "function") {
+        window.adminAuth.showAdminToast(successMsg);
+      } else {
+        alert(successMsg);
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
+      return;
+    }
+
+    // 2. Якщо обрано файли з пристрою
+    if (this.selectedFiles.length === 0) {
+      alert("Будь ласка, оберіть фотографії або вставте їх через Ctrl + V.");
+      return;
+    }
+
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = `⏳ Обробка ${this.selectedFiles.length} фото...`;
+      submitBtn.textContent = `⏳ Стиснення ${this.selectedFiles.length} фото...`;
     }
 
     try {
@@ -371,16 +734,31 @@ class LyceumGalleryApp {
       );
 
       const timestamp = Date.now();
-      // Зберігаємо виключно чисті фотографії без підписів
       const newPhotos = compressedList.map((src, i) => ({
         id: `photo_${timestamp}_${i}_${Math.random().toString(36).substr(2, 5)}`,
         src: src,
-        date: new Date().toLocaleDateString("uk-UA")
+        date: new Date().toLocaleDateString("uk-UA"),
+        timestamp: timestamp + i
       }));
 
       // Додаємо нові кадри на початок альбому
       album.photos.unshift(...newPhotos);
       this.saveAlbums(this.albums);
+
+      // Синхронізуємо кожне фото в Firebase Realtime Database
+      if (this.db) {
+        const updates = {};
+        newPhotos.forEach(p => {
+          updates[`gallery_live/photos/${albumId}/${p.id}`] = p;
+        });
+        this.db.ref().update(updates).then(() => {
+          if (window.adminAuth && typeof window.adminAuth.showAdminToast === "function") {
+            window.adminAuth.showAdminToast(`⚡ Синхронізовано з хмарою наживо!`);
+          }
+        }).catch(err => {
+          console.warn("Firebase upload error:", err);
+        });
+      }
 
       // Очищаємо стан модалки
       this.selectedFiles = [];
@@ -391,10 +769,11 @@ class LyceumGalleryApp {
       // Відкриваємо цільову папку та оновлюємо вигляд
       this.openFolder(albumId);
 
+      const successMsg = `📸 ${newPhotos.length} фото успішно додано до папки «${album.title}» без коміту!`;
       if (window.adminAuth && typeof window.adminAuth.showAdminToast === "function") {
-        window.adminAuth.showAdminToast(`📸 Успішно додано ${newPhotos.length} фото до альбому!`);
+        window.adminAuth.showAdminToast(successMsg);
       } else {
-        alert(`📸 Успішно додано ${newPhotos.length} фото до папки «${album.title}»!`);
+        alert(successMsg);
       }
     } catch (err) {
       console.error("Помилка обробки фотографій:", err);
@@ -425,8 +804,56 @@ class LyceumGalleryApp {
     this.saveAlbums(this.albums);
     this.renderSubfolder();
 
-    if (window.adminAuth && typeof window.adminAuth.showAdminToast === "function") {
-      window.adminAuth.showAdminToast("🗑️ Фото успішно видалено");
+    // Видаляємо з Firebase Realtime Database
+    if (this.db) {
+      this.db.ref(`gallery_live/photos/${this.currentAlbumId}/${photoId}`).remove()
+        .then(() => {
+          if (window.adminAuth && typeof window.adminAuth.showAdminToast === "function") {
+            window.adminAuth.showAdminToast("🗑️ Фото видалено з хмари наживо");
+          }
+        })
+        .catch(err => console.warn("Firebase delete error:", err));
+    } else {
+      if (window.adminAuth && typeof window.adminAuth.showAdminToast === "function") {
+        window.adminAuth.showAdminToast("🗑️ Фото успішно видалено");
+      }
+    }
+  }
+
+  clearCurrentAlbum() {
+    if (!window.adminAuth || !window.adminAuth.isAdmin) {
+      alert("Очищення альбому доступне виключно адміністратору партії!");
+      return;
+    }
+    const album = this.albums.find(a => a.id === this.currentAlbumId);
+    if (!album) return;
+
+    if (album.photos.length === 0) {
+      alert("Ця папка вже порожня!");
+      return;
+    }
+
+    if (!confirm(`Ви впевнені, що хочете видалити ВСІ ${album.photos.length} фотографій з альбому «${album.title}»?`)) {
+      return;
+    }
+
+    album.photos = [];
+    this.saveAlbums(this.albums);
+    this.renderSubfolder();
+
+    // Очищаємо вузол у Firebase
+    if (this.db) {
+      this.db.ref(`gallery_live/photos/${this.currentAlbumId}`).remove()
+        .then(() => {
+          if (window.adminAuth && typeof window.adminAuth.showAdminToast === "function") {
+            window.adminAuth.showAdminToast(`🗑️ Альбом «${album.title}» повністю очищено в хмарі!`);
+          }
+        })
+        .catch(err => console.warn("Firebase clear album error:", err));
+    } else {
+      if (window.adminAuth && typeof window.adminAuth.showAdminToast === "function") {
+        window.adminAuth.showAdminToast(`🗑️ Альбом «${album.title}» очищено`);
+      }
     }
   }
 
@@ -444,6 +871,39 @@ class LyceumGalleryApp {
     this.albums = incoming;
     this.saveAlbums(this.albums);
     this.render();
+  }
+
+  seedFirebaseFromLocal() {
+    if (!this.db) {
+      alert("Firebase ще не підключено або недоступний.");
+      return;
+    }
+    const updates = {};
+    this.albums.forEach(album => {
+      updates[`gallery_live/albums/${album.id}`] = {
+        id: album.id,
+        title: album.title,
+        desc: album.desc || "",
+        date: album.date || "",
+        category: album.category || "event"
+      };
+      if (Array.isArray(album.photos)) {
+        album.photos.forEach(p => {
+          updates[`gallery_live/photos/${album.id}/${p.id}`] = p;
+        });
+      }
+    });
+
+    this.db.ref().update(updates).then(() => {
+      const msg = `⚡ Всі ${this.albums.length} альбомів синхронізовано з хмарою Firebase!`;
+      if (window.adminAuth && typeof window.adminAuth.showAdminToast === "function") {
+        window.adminAuth.showAdminToast(msg);
+      } else {
+        alert(msg);
+      }
+    }).catch(err => {
+      alert("Помилка запису у Firebase: " + err.message);
+    });
   }
 
   openFolder(albumId) {
@@ -494,8 +954,8 @@ class LyceumGalleryApp {
     if (!this.foldersGrid) return;
 
     this.foldersGrid.innerHTML = this.albums.map(album => {
-      const count = album.photos.length;
-      const previewThumbs = album.photos.slice(0, 3);
+      const count = album.photos ? album.photos.length : 0;
+      const previewThumbs = (album.photos || []).slice(0, 3);
       const safeId = escapeHtml(album.id);
       const safeTitle = escapeHtml(album.title);
       const safeDesc = escapeHtml(album.desc);
@@ -539,29 +999,29 @@ class LyceumGalleryApp {
       return;
     }
 
-    this.activePhotoList = album.photos;
+    this.activePhotoList = album.photos || [];
 
     if (this.currentFolderTitle) {
       this.currentFolderTitle.textContent = album.title;
     }
 
     if (this.currentFolderMeta) {
-      this.currentFolderMeta.textContent = `${album.photos.length} фотографій`;
+      this.currentFolderMeta.textContent = `${this.activePhotoList.length} фотографій`;
     }
 
     if (this.photosGrid) {
-      if (album.photos.length === 0) {
+      if (this.activePhotoList.length === 0) {
         this.photosGrid.innerHTML = `
           <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
             <p style="font-size: 16px;">У цій папці ще немає фотографій.</p>
-            <p style="font-size: 13px; margin-top: 6px;" class="admin-only">Адміністратор може завантажити фото через кнопку «Додати фото» вгорі.</p>
+            <p style="font-size: 13px; margin-top: 6px;" class="admin-only">Адміністратор може завантажити фото через кнопку «Додати фото» вгорі (без коміту).</p>
           </div>
         `;
         return;
       }
 
-      // Чиста сітка фотографій без будь-яких підписів чи тексту
-      this.photosGrid.innerHTML = album.photos.map((photo, idx) => {
+      // Чиста сітка фотографій без підписів
+      this.photosGrid.innerHTML = this.activePhotoList.map((photo, idx) => {
         const safeId = escapeHtml(photo.id);
         const safeSrc = escapeHtml(photo.src);
         return `
@@ -579,7 +1039,7 @@ class LyceumGalleryApp {
     }
   }
 
-  compressImageFile(file, maxWidth = 1400, maxHeight = 1600, quality = 0.85) {
+  compressImageFile(file, maxWidth = 1400, maxHeight = 1600, quality = 0.82) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {

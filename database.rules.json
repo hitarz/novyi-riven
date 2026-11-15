@@ -5,6 +5,10 @@
     "costumes_live": {
       ".read": true,
       ".write": false
+    },
+    "gallery_live": {
+      ".read": true,
+      ".write": true
     }
   }
 }
